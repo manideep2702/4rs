@@ -25,6 +25,8 @@ export interface CharacterState {
   inspectorTab: 'info' | 'chat';
 
   llmConfig: LLMConfig;
+  byokError: string | null;
+  isBYOKOpen: boolean;
 
   setThinking: (isThinking: boolean) => void;
   setIsTyping: (isTyping: boolean) => void;
@@ -35,6 +37,8 @@ export interface CharacterState {
   setHoveredNpc: (index: number | null, pos: { x: number; y: number } | null) => void;
   setHoveredPoi: (id: string | null, label: string | null, pos: { x: number; y: number } | null) => void;
   setLlmConfig: (config: Partial<LLMConfig>) => void;
+  setBYOKOpen: (open: boolean) => void;
+  setBYOKError: (error: string | null) => void;
 }
 
 export enum AnimationName {

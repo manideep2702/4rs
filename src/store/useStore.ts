@@ -23,11 +23,22 @@ export const useStore = create<CharacterState>()(
     chatMessages: [],
     inspectorTab: 'info',
 
-    llmConfig: {
-      provider: 'gemini',
-      apiKey: 'AIzaSyCDphmgl5F_5dy4LCWHqDjvhVgHmWYF9C8',
-      model: 'gemini-2.5-flash'
-    },
+    llmConfig: (() => {
+      try {
+        const saved = localStorage.getItem('byok-config');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.apiKey) return parsed as { provider: 'gemini' | 'openai' | 'anthropic' | 'local'; apiKey: string; model: string };
+        }
+      } catch {}
+      return {
+        provider: 'gemini' as const,
+        apiKey: '',
+        model: 'gemini-2.5-flash',
+      };
+    })(),
+    byokError: null,
+    isBYOKOpen: false,
 
     setThinking: (isThinking: boolean) => set({ isThinking }),
     setIsTyping: (isTyping: boolean) => set({ isTyping }),
@@ -51,7 +62,12 @@ export const useStore = create<CharacterState>()(
       hoverPosition: pos,
       hoveredNpcIndex: null,
     }),
-    setLlmConfig: () => {},
+    setLlmConfig: (config) => set((s) => ({
+      llmConfig: { ...s.llmConfig, ...config },
+      byokError: null,
+    })),
+    setBYOKOpen: (open) => set({ isBYOKOpen: open }),
+    setBYOKError: (error) => set({ byokError: error }),
   })
 );
 

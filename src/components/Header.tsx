@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { useAgencyStore } from '../store/agencyStore';
-import { Maximize2, Info, Zap, ZapOff } from 'lucide-react';
+import { useStore } from '../store/useStore';
+import { Maximize2, Info, Zap, ZapOff, Key } from 'lucide-react';
 import { AnimatePresence } from 'motion/react';
 import InfoModal from './InfoModal';
 import { version } from '../../package.json';
 
 const Header: React.FC = () => {
   const { pauseOnCall, togglePauseOnCall, isPaused, setPaused } = useAgencyStore();
+  const { llmConfig, setBYOKOpen } = useStore();
   const [isInfoOpen, setIsInfoOpen] = useState(false);
+  const hasKey = !!llmConfig.apiKey;
 
   const handleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -74,6 +77,19 @@ const Header: React.FC = () => {
         >
           {pauseOnCall ? <Zap size={14} fill="currentColor" /> : <ZapOff size={14} />}
           <span>{pauseOnCall ? 'Debug Mode ON' : 'Debug Mode'}</span>
+        </button>
+
+        <button
+          onClick={() => setBYOKOpen(true)}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded text-[11px] font-bold uppercase tracking-wider transition-all border cursor-pointer ${
+            hasKey
+              ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100'
+              : 'bg-red-50 text-red-500 border-red-200 hover:bg-red-100 animate-pulse'
+          }`}
+          title={hasKey ? 'API Key configured' : 'No API Key — click to add'}
+        >
+          <Key size={14} />
+          <span>{hasKey ? 'API Key' : 'Add API Key'}</span>
         </button>
 
         <div className="w-[1px] h-4 bg-zinc-200 mx-1" />

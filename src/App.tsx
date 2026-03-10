@@ -14,6 +14,8 @@ import { ActionLogPanel } from './components/ActionLogPanel';
 import { KanbanPanel } from './components/KanbanPanel';
 import { FinalOutputModal } from './components/FinalOutputModal';
 import SimulationView from './components/SimulationView';
+import BYOKModal from './components/BYOKModal';
+import { useStore } from './store/useStore';
 
 /** Mounts inside SceneContext so useSceneManager() is available. */
 function AgencyOrchestrator() {
@@ -26,6 +28,7 @@ const App: React.FC = () => {
   const managerRef = useRef<SceneManager | null>(null);
   const [sceneManager, setSceneManager] = useState<SceneManager | null>(null);
   const { isLogOpen, isKanbanOpen, setIsResizing } = useAgencyStore();
+  const { llmConfig, isBYOKOpen, setBYOKOpen } = useStore();
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [kanbanHeight, setKanbanHeight] = useState(220);
@@ -58,6 +61,12 @@ const App: React.FC = () => {
       window.removeEventListener('mouseup', stopResizing);
     };
   }, [resize, stopResizing]);
+
+  useEffect(() => {
+    if (!llmConfig.apiKey) {
+      setBYOKOpen(true);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (canvasRef.current && !managerRef.current) {
@@ -109,6 +118,9 @@ const App: React.FC = () => {
 
         {/* Final output — fixed viewport overlay */}
         <FinalOutputModal />
+
+        {/* API Key modal */}
+        {isBYOKOpen && <BYOKModal onClose={() => setBYOKOpen(false)} />}
       </div>
     </SceneContext.Provider>
   );

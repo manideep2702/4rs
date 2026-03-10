@@ -177,15 +177,47 @@ export async function callAgent(params: {
     );
   }
 
+  const MAX_RETRIES = 3;
   let response;
-  try {
-    response = await Promise.race([
-      provider.generateCompletion(messages, tools, systemInstruction, llmConfig.model, signal),
-      abortRace(signal),
-    ]);
-  } catch (e) {
-    throw e;
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    throwIfAborted(signal);
+    try {
+      response = await Promise.race([
+        provider.generateCompletion(messages, tools, systemInstruction, llmConfig.model, signal),
+        abortRace(signal),
+      ]);
+      break;
+    } catch (e) {
+      if ((e as DOMException)?.name === 'AbortError') throw e;
+      const isRateLimit = (e as any)?.status === 429 ||
+        (e as any)?.message?.includes('429') ||
+        (e as any)?.message?.toLowerCase()?.includes('rate') ||
+        (e as any)?.message?.toLowerCase()?.includes('quota');
+
+      if (attempt < MAX_RETRIES - 1 && isRateLimit) {
+        const backoff = (attempt + 1) * 3000 + Math.random() * 2000;
+        useAgencyStore.getState().addLogEntry({
+          agentIndex,
+          action: `API rate limited — retrying in ${Math.round(backoff / 1000)}s (attempt ${attempt + 2}/${MAX_RETRIES})`,
+        });
+        await new Promise((r) => setTimeout(r, backoff));
+        continue;
+      }
+
+      const errMsg = (e as Error)?.message || String(e);
+      useAgencyStore.getState().addLogEntry({
+        agentIndex,
+        action: `API error: ${errMsg.slice(0, 120)}`,
+      });
+
+      if (!llmConfig.apiKey) {
+        useStore.getState().setBYOKError('No API key configured. Please add your Gemini API key.');
+        useStore.getState().setBYOKOpen(true);
+      }
+      throw e;
+    }
   }
+  if (!response) throw new Error('LLM call failed after retries');
 
   const text = response.content || '';
   let toolCalls = response.tool_calls || [];

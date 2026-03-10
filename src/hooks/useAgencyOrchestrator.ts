@@ -100,7 +100,6 @@ export function useAgencyOrchestrator() {
   const runSingleAgentTask = async (task: Task, agentIndex: number) => {
     await sleep(randomBetween(1500, 3000))
 
-    // Programmatically start the task (replaces the old execute_work LLM call)
     const store = useAgencyStore.getState()
     store.updateTaskStatus(task.id, 'in_progress')
     store.addLogEntry({
@@ -111,7 +110,6 @@ export function useAgencyOrchestrator() {
     sceneRef.current?.setNpcWorking(agentIndex, true)
 
     try {
-      // Single combined call: draft + complete in one shot
       const response = await callAgent({
         agentIndex,
         userMessage: `You have been assigned task [${task.id}]: "${task.description}". ` +
@@ -124,10 +122,20 @@ export function useAgencyOrchestrator() {
         }
       }
     } catch (err) {
-      if ((err as DOMException)?.name !== 'AbortError') console.error(`[Orchestrator] agent ${agentIndex} task error:`, err)
+      if ((err as DOMException)?.name !== 'AbortError') {
+        console.error(`[Orchestrator] agent ${agentIndex} task error:`, err)
+        const currentTask = useAgencyStore.getState().tasks.find(t => t.id === task.id)
+        if (currentTask && currentTask.status === 'in_progress') {
+          useAgencyStore.getState().updateTaskStatus(task.id, 'scheduled')
+          useAgencyStore.getState().addLogEntry({
+            agentIndex,
+            action: `task reset to scheduled after API error — will retry`,
+            taskId: task.id,
+          })
+        }
+        sceneRef.current?.setNpcWorking(agentIndex, false)
+      }
     } finally {
-      // Always clean up — handles early returns (on_hold/done) and errors.
-      // complete_task already deletes, but a Set delete is idempotent.
       runningAgents.current.delete(agentIndex)
     }
   }
@@ -337,21 +345,20 @@ export function useAgencyOrchestrator() {
           !prev.tasks.some((pt) => pt.id === t.id && pt.status === 'scheduled'),
       )
 
-      // Guard: only dispatch unique newly scheduled tasks
       if (newScheduled.length > 0) {
-        setTimeout(() => {
-          // Re-verify status before dispatching to ensure idempotency after the delay
-          const currentStore = useAgencyStore.getState();
-          for (const task of newScheduled) {
+        const staggerDispatch = async () => {
+          for (let i = 0; i < newScheduled.length; i++) {
+            const task = newScheduled[i];
+            if (i > 0) await sleep(3000);
+            const currentStore = useAgencyStore.getState();
             const currentTask = currentStore.tasks.find(t => t.id === task.id);
             const agentIndex = task.assignedAgentIds[0];
-
-            // Dispatch only if still scheduled AND agent isn't already busy
             if (currentTask?.status === 'scheduled' && !runningAgents.current.has(agentIndex)) {
               dispatchTask(task);
             }
           }
-        }, 2000);
+        };
+        setTimeout(() => staggerDispatch(), 2000);
       }
 
       // Exit chat mode only when a brand-new task (scheduled) starts for the chatted NPC.

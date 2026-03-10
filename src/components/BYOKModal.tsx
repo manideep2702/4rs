@@ -16,7 +16,7 @@ const PROVIDERS = [
 ] as const;
 
 const BYOKModal: React.FC<BYOKModalProps> = ({ onClose }) => {
-  const { llmConfig, setLlmConfig, byokError, setBYOKOpen } = useStore();
+  const { llmConfig, setLlmConfig, byokError } = useStore();
 
   const [selectedProvider, setSelectedProvider] = useState<string>(llmConfig.provider);
   const [apiKey, setApiKey] = useState<string>(llmConfig.apiKey || '');
