@@ -30,7 +30,7 @@ export const useStore = create<CharacterState>()(
           const parsed = JSON.parse(saved);
           if (parsed.apiKey) {
             if (parsed.model === 'gemini-3-flash-preview') parsed.model = 'gemini-2.5-flash';
-            return parsed as { provider: 'gemini' | 'openai' | 'anthropic' | 'local'; apiKey: string; model: string };
+            return parsed as { provider: 'gemini' | 'openai' | 'anthropic' | 'qwen' | 'local'; apiKey: string; model: string };
           }
         }
       } catch {}

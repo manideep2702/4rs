@@ -11,6 +11,7 @@ const STORAGE_KEY = 'byok-config';
 
 const PROVIDERS = [
   { id: 'gemini', label: 'Gemini', model: 'gemini-2.5-flash', enabled: true },
+  { id: 'qwen', label: 'Qwen', model: 'qwen-plus', enabled: true },
   { id: 'openai', label: 'OpenAI', model: 'gpt-4o', enabled: false },
   { id: 'anthropic', label: 'Anthropic', model: 'claude-opus-4-5', enabled: false },
 ] as const;
@@ -25,7 +26,7 @@ const BYOKModal: React.FC<BYOKModalProps> = ({ onClose }) => {
   const handleSave = () => {
     const provider = PROVIDERS.find(p => p.id === selectedProvider)!;
     const config = {
-      provider: provider.id as 'gemini' | 'openai' | 'anthropic' | 'local',
+      provider: provider.id as 'gemini' | 'openai' | 'anthropic' | 'qwen' | 'local',
       apiKey,
       model: provider.model,
     };
@@ -39,7 +40,7 @@ const BYOKModal: React.FC<BYOKModalProps> = ({ onClose }) => {
   const handleClear = () => {
     const provider = PROVIDERS.find(p => p.id === selectedProvider)!;
     const emptyConfig = {
-      provider: provider.id as 'gemini' | 'openai' | 'anthropic' | 'local',
+      provider: provider.id as 'gemini' | 'openai' | 'anthropic' | 'qwen' | 'local',
       apiKey: '',
       model: provider.model,
     };
@@ -143,6 +144,20 @@ const BYOKModal: React.FC<BYOKModalProps> = ({ onClose }) => {
                   >
                     <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600">Get Gemini API Key</span>
                     <svg className="text-emerald-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="7" y1="17" x2="17" y2="7"></line>
+                      <polyline points="7 7 17 7 17 17"></polyline>
+                    </svg>
+                  </a>
+                )}
+                {selectedProvider === 'qwen' && (
+                  <a
+                    href="https://modelstudio.console.alibabacloud.com"
+                    target="_blank"
+                    rel="noopener"
+                    className="group flex items-center gap-2 px-3 py-1 bg-orange-50 hover:bg-orange-100 border border-orange-100 hover:border-orange-200 rounded-full transition-all duration-200"
+                  >
+                    <span className="text-[10px] font-black uppercase tracking-wider text-orange-600">Get Qwen API Key</span>
+                    <svg className="text-orange-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="7" y1="17" x2="17" y2="7"></line>
                       <polyline points="7 7 17 7 17 17"></polyline>
                     </svg>
