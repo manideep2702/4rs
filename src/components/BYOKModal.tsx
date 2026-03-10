@@ -10,7 +10,7 @@ interface BYOKModalProps {
 const STORAGE_KEY = 'byok-config';
 
 const PROVIDERS = [
-  { id: 'gemini', label: 'Gemini', model: 'gemini-3-flash-preview', enabled: true },
+  { id: 'gemini', label: 'Gemini', model: 'gemini-2.5-flash', enabled: true },
   { id: 'openai', label: 'OpenAI', model: 'gpt-4o', enabled: false },
   { id: 'anthropic', label: 'Anthropic', model: 'claude-opus-4-5', enabled: false },
 ] as const;

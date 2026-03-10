@@ -28,7 +28,10 @@ export const useStore = create<CharacterState>()(
         const saved = localStorage.getItem('byok-config');
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (parsed.apiKey) return parsed as { provider: 'gemini' | 'openai' | 'anthropic' | 'local'; apiKey: string; model: string };
+          if (parsed.apiKey) {
+            if (parsed.model === 'gemini-3-flash-preview') parsed.model = 'gemini-2.5-flash';
+            return parsed as { provider: 'gemini' | 'openai' | 'anthropic' | 'local'; apiKey: string; model: string };
+          }
         }
       } catch {}
       return {
