@@ -2,11 +2,7 @@
 
 ![The Delegation Hero](public/images/the-delegation-UI.png)
 
-## Online Demo
-
-**Try the Live Demo: [arturitu.github.io/the-delegation](https://arturitu.github.io/the-delegation/)**
-
-This simulation requires **BYOK (Bring Your Own Key)**. Currently, it only supports the **Gemini API** by Google. Multi-provider support is planned for future updates.
+**Try the Live Demo: [4rs.vercel.app](https://4rs.vercel.app/)**
 
 ## Getting Started
 
@@ -56,7 +52,7 @@ Unlike traditional "chat-only" agent frameworks, these characters are _embodied_
 
 - **Engine:** [Three.js](https://threejs.org/) (WebGPU & TSL) for advanced rendering and compute.
 - **UI:** [React](https://react.dev/) for a modern, component-based interface.
-- **AI:** [Gemini API](https://deepmind.google/technologies/gemini/) (BYOK: Bring Your Own Key) is the current LLM provider. The architecture is designed for future multi-provider support (see Roadmap).
+- **AI:** [Gemini](https://deepmind.google/technologies/gemini/), [Qwen/Alibaba Cloud](https://www.alibabacloud.com/en/solutions/generative-ai/qwen), [OpenAI](https://openai.com/), and [Anthropic](https://www.anthropic.com/) — multi-provider BYOK support.
 - **State:** [Zustand](https://github.com/pmndrs/zustand) for a unified, reactive store bridging the 3D world and React UI.
 - **3D Assets:** All modeling and animation were done in Blender, exported to glTF for efficient use with Three.js. The animation system uses a custom state machine to handle instanced GLTF character animations.
 
@@ -65,19 +61,13 @@ Unlike traditional "chat-only" agent frameworks, these characters are _embodied_
 My goal is to move towards a fully sandboxable agency experience:
 
 - **Intelligence**
-  - [ ] **Multi-Model Support:** Integration for OpenAI, Anthropic, and local Ollama models.
+  - [x] **Multi-Model Support:** Gemini, Qwen, OpenAI, Anthropic supported. Local Ollama planned.
   - [ ] **Per-Agent LLM:** Assign different models/providers to specific roles.
   - [ ] **Custom Teams:** Create your own expert sets with unique personalities and missions via UI.
 - **Creative Outputs**
   - [ ] **Rich Deliverables:** Final project output including generated images, videos, code snippets, or synthesized music.
 - **World Building**
   - [ ] **Office/3D Space Editor:** Drag-and-drop editor to customize the workspace layout and POIs.
-
-## Supporting the Project
-
-The Delegation is an experiment in the future of human-AI collaboration. If you find this project inspiring or useful for your own research, consider supporting my work:
-
-[![Sponsor GitHub](https://img.shields.io/badge/Sponsor-GitHub-ea4aaa?logo=github)](https://github.com/sponsors/arturitu)
 
 ## License & IP
 
@@ -86,4 +76,4 @@ This project follows a dual-licensing model:
 - **Source Code (MIT):** All logic, shaders, and UI code are free to use, modify, and distribute.
 - **3D Models & Assets (CC BY-NC 4.0):** The custom 3D office and character models are Copyright © 2026 **Arturo Paracuellos (unboring.net)**. They are free for personal and educational use but _cannot_ be used for commercial purposes without permission.
 
-Developed with ❤️ by [Arturo Paracuellos](https://unboring.net)
+Built by [Manideep Pasumarthi](https://github.com/manideep2702)
