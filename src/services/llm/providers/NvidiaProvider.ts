@@ -61,6 +61,11 @@ export class NvidiaProvider implements LLMProvider {
       body.tool_choice = 'auto';
     }
 
+    const timeoutSignal = AbortSignal.timeout(120_000);
+    const combinedSignal = signal
+      ? AbortSignal.any([signal, timeoutSignal])
+      : timeoutSignal;
+
     const res = await fetch(`${this.baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
@@ -68,7 +73,7 @@ export class NvidiaProvider implements LLMProvider {
         Authorization: `Bearer ${this.apiKey}`,
       },
       body: JSON.stringify(body),
-      signal,
+      signal: combinedSignal,
     });
 
     if (!res.ok) {

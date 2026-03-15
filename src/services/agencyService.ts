@@ -193,12 +193,14 @@ export async function callAgent(params: {
         (e as any)?.message?.includes('429') ||
         (e as any)?.message?.toLowerCase()?.includes('rate') ||
         (e as any)?.message?.toLowerCase()?.includes('quota');
+      const isTimeout = (e as DOMException)?.name === 'TimeoutError' ||
+        (e as Error)?.message?.toLowerCase()?.includes('timeout');
 
-      if (attempt < MAX_RETRIES - 1 && isRateLimit) {
+      if (attempt < MAX_RETRIES - 1 && (isRateLimit || isTimeout)) {
         const backoff = (attempt + 1) * 3000 + Math.random() * 2000;
         useAgencyStore.getState().addLogEntry({
           agentIndex,
-          action: `API rate limited — retrying in ${Math.round(backoff / 1000)}s (attempt ${attempt + 2}/${MAX_RETRIES})`,
+          action: `API ${isTimeout ? 'timed out' : 'rate limited'} — retrying in ${Math.round(backoff / 1000)}s (attempt ${attempt + 2}/${MAX_RETRIES})`,
         });
         await new Promise((r) => setTimeout(r, backoff));
         continue;
