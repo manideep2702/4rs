@@ -164,7 +164,7 @@ const UIOverlay: React.FC = () => {
                 />
                 <div className="flex items-center gap-1.5">
                   {selectedAgent.isPlayer ? (
-                    <span className="text-[10px] font-black uppercase tracking-widest text-white">{selectedAgent.role} (You)</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white">{selectedAgent.name} (You)</span>
                   ) : isOrchestratorProjectReady ? (
                     <span className={`text-[10px] font-black uppercase tracking-widest ${label.className}`}>
                       {label.text}
@@ -172,7 +172,7 @@ const UIOverlay: React.FC = () => {
                   ) : (
                     <>
                       <span className="text-[10px] font-black uppercase tracking-widest text-white">
-                        {selectedAgent.role}
+                        {selectedAgent.name}
                       </span>
                       <span className="text-[10px] font-medium uppercase tracking-widest text-white/40">·</span>
                       <span className={`text-[10px] font-bold uppercase tracking-widest ${label.className}`}>
@@ -207,7 +207,7 @@ const UIOverlay: React.FC = () => {
                 />
                 <div className="flex items-center gap-1.5">
                   {hoveredAgent.isPlayer ? (
-                    <span className="text-[10px] font-black uppercase tracking-widest text-white">{hoveredAgent.role} (You)</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white">{hoveredAgent.name} (You)</span>
                   ) : isOrchestratorProjectReady ? (
                     <span className={`text-[10px] font-black uppercase tracking-widest ${label.className}`}>
                       {label.text}
@@ -215,7 +215,7 @@ const UIOverlay: React.FC = () => {
                   ) : (
                     <>
                       <span className="text-[10px] font-black uppercase tracking-widest text-white">
-                        {hoveredAgent.role}
+                        {hoveredAgent.name}
                       </span>
                       <span className="text-[10px] font-medium uppercase tracking-widest text-white/40">·</span>
                       <span className={`text-[10px] font-bold uppercase tracking-widest ${label.className}`}>

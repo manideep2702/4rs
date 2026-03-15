@@ -130,11 +130,10 @@ const ChatPanel: React.FC = () => {
                 </div>
 
                 <div className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                  <div className={`px-4 py-2.5 rounded-[20px] text-[14px] leading-relaxed shadow-sm ${
-                    msg.role === 'user'
-                    ? 'bg-blue-50/50 text-zinc-800 rounded-tr-none border border-blue-100/50'
-                    : 'bg-zinc-50 text-zinc-800 rounded-tl-none border border-zinc-100'
-                  }`}>
+                  <div className={`px-4 py-2.5 rounded-[20px] text-[14px] leading-relaxed shadow-sm ${msg.role === 'user'
+                      ? 'bg-blue-50/50 text-zinc-800 rounded-tr-none border border-blue-100/50'
+                      : 'bg-zinc-50 text-zinc-800 rounded-tl-none border border-zinc-100'
+                    }`}>
                     {msg.role === 'assistant' ? (
                       <div className="markdown-content">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -148,7 +147,7 @@ const ChatPanel: React.FC = () => {
 
                   <div className={`flex items-center gap-2 mt-2 px-1`}>
                     <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                      {msg.role === 'user' ? 'You' : agent.role.split(' ')[0]}
+                      {msg.role === 'user' ? 'You' : agent.name}
                     </span>
                   </div>
                 </div>
@@ -164,9 +163,9 @@ const ChatPanel: React.FC = () => {
             className="flex items-start gap-3"
           >
             <div className="w-4 h-4 text-zinc-300 animate-pulse mt-1">
-               <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2L14.85 9.15L22 12L14.85 14.85L12 22L9.15 14.85L2 12L9.15 9.15L12 2Z" />
-               </svg>
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L14.85 9.15L22 12L14.85 14.85L12 22L9.15 14.85L2 12L9.15 9.15L12 2Z" />
+              </svg>
             </div>
             <div className="bg-zinc-50 px-4 py-3 rounded-2xl rounded-tl-none">
               <div className="flex gap-1">
@@ -213,11 +212,10 @@ const ChatPanel: React.FC = () => {
             onClick={handleSend}
             disabled={!input.trim() || isThinking}
             style={{ backgroundColor: !input.trim() || isThinking ? undefined : agent.color }}
-            className={`h-11 w-11 shrink-0 rounded-2xl flex items-center justify-center font-black text-xs uppercase tracking-widest transition-all active:scale-95 ${
-              !input.trim() || isThinking
-              ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
-              : 'text-white shadow-lg hover:brightness-90'
-            }`}
+            className={`h-11 w-11 shrink-0 rounded-2xl flex items-center justify-center font-black text-xs uppercase tracking-widest transition-all active:scale-95 ${!input.trim() || isThinking
+                ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
+                : 'text-white shadow-lg hover:brightness-90'
+              }`}
           >
             <Send size={16} strokeWidth={3} />
           </button>

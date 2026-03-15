@@ -6,10 +6,10 @@ import DeleteTaskModal from './DeleteTaskModal'
 import { useStore } from '../store/useStore'
 
 const COLUMNS: { status: TaskStatus; label: string }[] = [
-  { status: 'scheduled',   label: 'Scheduled'   },
-  { status: 'on_hold',     label: 'On Hold'      },
-  { status: 'in_progress', label: 'In Progress'  },
-  { status: 'done',        label: 'Done'         },
+  { status: 'scheduled', label: 'Scheduled' },
+  { status: 'on_hold', label: 'On Hold' },
+  { status: 'in_progress', label: 'In Progress' },
+  { status: 'done', label: 'Done' },
 ]
 
 interface KanbanPanelProps {
@@ -18,7 +18,7 @@ interface KanbanPanelProps {
 
 function renderAgentTag(agentIndex: number) {
   if (agentIndex === 0) { // Client / You
-     return (
+    return (
       <span key={agentIndex} className="flex items-center gap-1 text-[10px] text-[#7EACEA] font-bold">
         <span
           className="w-1.5 h-1.5 rounded-full shrink-0 bg-[#7EACEA]"
@@ -35,7 +35,7 @@ function renderAgentTag(agentIndex: number) {
         className="w-1.5 h-1.5 rounded-full shrink-0"
         style={{ backgroundColor: agent.color }}
       />
-      {agent.role}
+      {agent.name}
     </span>
   )
 }

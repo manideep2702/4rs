@@ -10,6 +10,7 @@ export const DEFAULT_AGENT_SET_ID = 'marketing-agency';
 // ─────────────────────────────────────────────────────────────
 export interface AgentData {
   index: number;
+  name: string;
   department: string;
   role: string;
   expertise: string[];
@@ -32,16 +33,17 @@ export interface AgentSet {
 //  Agent Sets
 // ─────────────────────────────────────────────────────────────
 export const AGENT_SETS: AgentSet[] = [
-  // ── 1. Unboring dot net ─────────────────────────
+  // ── 1. Looma ─────────────────────────────────────────────────
   {
     id: 'marketing-agency',
-    companyName: 'Unboring.net',
+    companyName: 'Looma',
     companyType: 'Creative & Strategy Agency',
     companyDescription: 'A full-service creative agency covering branding, design, development and go-to-market strategy.',
     color: '#7C3AED',
     agents: [
       {
         index: 0,
+        name: 'Manideep',
         department: 'Client',
         role: 'Client',
         expertise: ['Vision', 'Idea', 'Requirements'],
@@ -52,6 +54,7 @@ export const AGENT_SETS: AgentSet[] = [
       },
       {
         index: 1,
+        name: 'Aarav',
         department: 'Coordination',
         role: 'Account Manager',
         expertise: ['Orchestration', 'Project Management', 'Communication'],
@@ -62,6 +65,7 @@ export const AGENT_SETS: AgentSet[] = [
       },
       {
         index: 2,
+        name: 'Meghana',
         department: 'UX/UI',
         role: 'Designer',
         expertise: ['UI/UX', 'Aesthetics', 'Branding'],
@@ -72,6 +76,7 @@ export const AGENT_SETS: AgentSet[] = [
       },
       {
         index: 3,
+        name: 'Vikram',
         department: 'Engineering',
         role: 'Developer',
         expertise: ['Architecture', 'Technical Feasibility', 'Tech Stack'],
@@ -82,6 +87,7 @@ export const AGENT_SETS: AgentSet[] = [
       },
       {
         index: 4,
+        name: 'Lavanya',
         department: 'Marketing',
         role: 'Marketing Expert',
         expertise: ['Market Analysis', 'Target Audience', 'Narrative'],
@@ -92,6 +98,7 @@ export const AGENT_SETS: AgentSet[] = [
       },
       {
         index: 5,
+        name: 'Ranjith',
         department: 'Business',
         role: 'Sales Lead',
         expertise: ['Profitability', 'Business Viability', 'Sales'],
@@ -113,6 +120,7 @@ export const AGENT_SETS: AgentSet[] = [
     agents: [
       {
         index: 0,
+        name: 'Arjun',
         department: 'Visionary',
         role: 'Lead Visionary',
         expertise: ['Game Concepts', 'Core Mechanics', 'Player Experience'],
@@ -123,6 +131,7 @@ export const AGENT_SETS: AgentSet[] = [
       },
       {
         index: 1,
+        name: 'Karthik',
         department: 'Direction',
         role: 'Game Director',
         expertise: ['Game Design', 'Systems Design', 'World Building'],
@@ -133,6 +142,7 @@ export const AGENT_SETS: AgentSet[] = [
       },
       {
         index: 2,
+        name: 'Sravani',
         department: 'Engineering',
         role: 'Technical Architect',
         expertise: ['Game Engines', 'AI Systems', 'Prompt Engineering'],
@@ -154,6 +164,7 @@ export const AGENT_SETS: AgentSet[] = [
     agents: [
       {
         index: 0,
+        name: 'Siddharth',
         department: 'Artist',
         role: 'Artist',
         expertise: ['Vibe', 'Inspiration', 'Mood'],
@@ -164,16 +175,18 @@ export const AGENT_SETS: AgentSet[] = [
       },
       {
         index: 1,
+        name: 'Pranav',
         department: 'Production',
         role: 'Music Producer',
         expertise: ['Orchestration', 'Arrangement', 'Direction'],
-        mission: 'Coordinate the rhythmic, harmonic, and lyrical specialists to realize the artist\'s vision.',
+        mission: "Coordinate the rhythmic, harmonic, and lyrical specialists to realize the artist's vision.",
         personality: 'Experienced, visionary, and a natural leader.',
         isPlayer: false,
         color: '#F59E0B',
       },
       {
         index: 2,
+        name: 'Tejaswi',
         department: 'Rhythm',
         role: 'Rhythm Expert',
         expertise: ['Beats', 'Groove', 'Percussion', 'Tempo'],
@@ -184,6 +197,7 @@ export const AGENT_SETS: AgentSet[] = [
       },
       {
         index: 3,
+        name: 'Haritha',
         department: 'Harmony',
         role: 'Harmony Expert',
         expertise: ['Chords', 'Progression', 'Texturing'],
@@ -194,6 +208,7 @@ export const AGENT_SETS: AgentSet[] = [
       },
       {
         index: 4,
+        name: 'Chaitanya',
         department: 'Melody',
         role: 'Melody Expert',
         expertise: ['Hooks', 'Leads', 'Counter-melody'],
@@ -204,6 +219,7 @@ export const AGENT_SETS: AgentSet[] = [
       },
       {
         index: 5,
+        name: 'Bhavana',
         department: 'Lyrics',
         role: 'Lyrics Expert',
         expertise: ['Storytelling', 'Rhyme', 'Metaphor', 'Tone'],
@@ -225,6 +241,7 @@ export const AGENT_SETS: AgentSet[] = [
     agents: [
       {
         index: 0,
+        name: 'Suresh',
         department: 'Patron',
         role: 'Patron',
         expertise: ['Taste', 'Cravings', 'Occasion'],
@@ -235,6 +252,7 @@ export const AGENT_SETS: AgentSet[] = [
       },
       {
         index: 1,
+        name: 'Raghava',
         department: 'Kitchen',
         role: 'Executive Chef',
         expertise: ['Flavor Pairing', 'Molecular Gastronomy', 'Menu Design'],
@@ -245,6 +263,7 @@ export const AGENT_SETS: AgentSet[] = [
       },
       {
         index: 2,
+        name: 'Ankitha',
         department: 'Cellar',
         role: 'Sommelier',
         expertise: ['Wine Pairing', 'Mixology', 'Tasting Notes'],
@@ -255,6 +274,7 @@ export const AGENT_SETS: AgentSet[] = [
       },
       {
         index: 3,
+        name: 'Deeksha',
         department: 'Ambiance',
         role: 'Experience Designer',
         expertise: ['Lighting', 'Soundscape', 'Plating Aesthetics'],

@@ -73,8 +73,11 @@ const InspectorPanel: React.FC<InspectorPanelProps> = ({ isFloating }) => {
                     </p>
                   </div>
                   <h2 className="text-xl font-black text-zinc-900 leading-tight">
-                    {agent.role}
+                    {agent.name}
                   </h2>
+                  <p className="text-[11px] font-semibold text-zinc-400 leading-tight mt-0.5">
+                    {agent.role}
+                  </p>
                 </div>
               </div>
               {needsDiscussion && isChatting && (
@@ -94,7 +97,7 @@ const InspectorPanel: React.FC<InspectorPanelProps> = ({ isFloating }) => {
                   <p className="text-[12px] font-bold text-zinc-900 leading-tight mt-1.5">
                     {isOrchestratorIdle
                       ? "Waiting for project briefing."
-                      : `${agent?.role} needs input.`}
+                      : `${agent?.name} needs input.`}
                   </p>
                 </div>
               )}
@@ -147,11 +150,10 @@ const InspectorPanel: React.FC<InspectorPanelProps> = ({ isFloating }) => {
                       onClick={handleStartChat}
                       disabled={!canChat}
                       title={!canChat ? reason : undefined}
-                      className={`w-full h-10 px-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 text-[10px] font-black uppercase tracking-widest ${
-                        canChat
-                        ? 'bg-zinc-900 text-white border-none shadow-md'
-                        : 'bg-zinc-50 text-zinc-300 border border-transparent cursor-not-allowed'
-                      }`}
+                      className={`w-full h-10 px-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 text-[10px] font-black uppercase tracking-widest ${canChat
+                          ? 'bg-zinc-900 text-white border-none shadow-md'
+                          : 'bg-zinc-50 text-zinc-300 border border-transparent cursor-not-allowed'
+                        }`}
                     >
                       {canChat ? (
                         <>

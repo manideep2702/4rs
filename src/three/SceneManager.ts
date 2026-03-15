@@ -327,10 +327,10 @@ export class SceneManager {
         const positions = this.controller.getCPUPositions();
         const currentPos = positions
           ? new THREE.Vector3(
-              positions[index * 4],
-              positions[index * 4 + 1],
-              positions[index * 4 + 2],
-            )
+            positions[index * 4],
+            positions[index * 4 + 1],
+            positions[index * 4 + 2],
+          )
           : undefined;
         this.controller.walkToPoi(index, poi.id, undefined, currentPos);
       } else {
@@ -347,10 +347,10 @@ export class SceneManager {
     const positions = this.controller.getCPUPositions();
     const currentPos = positions
       ? new THREE.Vector3(
-          positions[index * 4],
-          positions[index * 4 + 1],
-          positions[index * 4 + 2],
-        )
+        positions[index * 4],
+        positions[index * 4 + 1],
+        positions[index * 4 + 2],
+      )
       : undefined;
 
     // Convention: idle-spawn-1, idle-spawn-2, etc.
@@ -373,7 +373,7 @@ export class SceneManager {
     useStore.setState({ isThinking: true });
     try {
       // Simplified operational greeting
-      const text = `Hello. I am the ${agent.role}. How can I help you with our current objectives?`;
+      const text = `Hello! I'm ${agent.name}, the ${agent.role}. How can I help you with our current objectives?`;
       const msg: ChatMessage = {
         role: 'assistant',
         text,
