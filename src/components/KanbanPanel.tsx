@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
 import { useAgencyStore, type Task, type TaskStatus } from '../store/agencyStore'
 import { getActiveAgentSet } from '../store/agencyStore'
-import { ChevronDown, ChevronRight, Trash2, MessageSquareWarning } from 'lucide-react'
+import { ChevronDown, ChevronRight, Trash2, MessageSquareWarning, Clock } from 'lucide-react'
 import DeleteTaskModal from './DeleteTaskModal'
 import { useStore } from '../store/useStore'
+import { useElapsedTime } from '../hooks/useElapsedTime'
 
 const COLUMNS: { status: TaskStatus; label: string }[] = [
   { status: 'scheduled', label: 'Scheduled' },
@@ -38,6 +39,22 @@ function renderAgentTag(agentIndex: number) {
       {agent.name}
     </span>
   )
+}
+
+function WorkingTimer({ startMs }: { startMs: number }) {
+  const { label, seconds } = useElapsedTime(startMs);
+  const isStuck = seconds >= 120;
+  const isVeryStuck = seconds >= 600;
+  return (
+    <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+      isVeryStuck ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 animate-pulse' :
+      isStuck     ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400' :
+                    'bg-blue-50 text-blue-600 border border-blue-200'
+    }`}>
+      <Clock size={9} />
+      {label}
+    </span>
+  );
 }
 
 function TaskCard({ task }: { task: Task; key?: string }) {
@@ -115,9 +132,7 @@ function TaskCard({ task }: { task: Task; key?: string }) {
         {effectiveAgentIds.map(renderAgentTag)}
       </div>
       {task.status === 'in_progress' && (
-        <span className="inline-block text-[10px] font-bold text-blue-600 bg-blue-50 border border-blue-200 rounded-full px-2 py-0.5">
-          working
-        </span>
+        <WorkingTimer startMs={task.updatedAt} />
       )}
     </div>
   )
