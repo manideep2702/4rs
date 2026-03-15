@@ -12,7 +12,7 @@ const STORAGE_KEY = 'byok-config';
 const PROVIDERS = [
   { id: 'gemini', label: 'Gemini', model: 'gemini-2.5-flash', enabled: true },
   { id: 'qwen', label: 'Qwen', model: 'qwen-turbo', enabled: true },
-  { id: 'nvidia', label: 'NVIDIA', model: 'nvidia/nemotron-3-nano-30b-a3b', enabled: true },
+  { id: 'nvidia', label: 'NVIDIA', model: 'minimaxai/minimax-m2.5', enabled: true },
   { id: 'openai', label: 'OpenAI', model: 'gpt-4o', enabled: false },
   { id: 'anthropic', label: 'Anthropic', model: 'claude-opus-4-5', enabled: false },
 ] as const;

@@ -1,12 +1,10 @@
 import { GeminiProvider } from './providers/GeminiProvider';
 import { OpenAICompatibleProvider } from './providers/OpenAICompatibleProvider';
+import { NvidiaProvider } from './providers/NvidiaProvider';
 import { LLMProvider, LLMConfig } from './types';
 
 const QWEN_BASE_URL = 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1';
 const OPENAI_BASE_URL = 'https://api.openai.com/v1';
-const NVIDIA_BASE_URL = import.meta.env.DEV
-  ? '/nvidia-api/v1'
-  : 'https://integrate.api.nvidia.com/v1';
 
 export class LLMFactory {
   static getProvider(config: LLMConfig): LLMProvider {
@@ -20,7 +18,7 @@ export class LLMFactory {
       case 'local':
         return new OpenAICompatibleProvider(config.apiKey || '', config.baseUrl || 'http://localhost:11434/v1');
       case 'nvidia':
-        return new OpenAICompatibleProvider(config.apiKey || '', config.baseUrl || NVIDIA_BASE_URL);
+        return new NvidiaProvider(config.apiKey || '', config.baseUrl);
       default:
         throw new Error(`Provider ${config.provider} not supported`);
     }
