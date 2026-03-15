@@ -38,7 +38,7 @@ export const AGENT_SETS: AgentSet[] = [
     companyName: 'Unboring.net',
     companyType: 'Creative & Strategy Agency',
     companyDescription: 'A full-service creative agency covering branding, design, development and go-to-market strategy.',
-    color: '#4387E2',
+    color: '#7C3AED',
     agents: [
       {
         index: 0,
@@ -58,7 +58,7 @@ export const AGENT_SETS: AgentSet[] = [
         mission: "Break down the client's request into actionable missions for the team.",
         personality: 'Organized, efficient, and central orchestrator.',
         isPlayer: false,
-        color: '#4387E2',
+        color: '#7C3AED',
       },
       {
         index: 2,
@@ -68,7 +68,7 @@ export const AGENT_SETS: AgentSet[] = [
         mission: 'Ensure the aesthetics and user experience are exceptional.',
         personality: 'Creative, detail-oriented, and focused on visual harmony.',
         isPlayer: false,
-        color: '#eab308',
+        color: '#F59E0B',
       },
       {
         index: 3,
@@ -78,7 +78,7 @@ export const AGENT_SETS: AgentSet[] = [
         mission: 'Evaluate technical feasibility and define the necessary architecture.',
         personality: 'Pragmatic, technical, and focused on robustness.',
         isPlayer: false,
-        color: '#22c55e',
+        color: '#10B981',
       },
       {
         index: 4,
@@ -88,7 +88,7 @@ export const AGENT_SETS: AgentSet[] = [
         mission: 'Analyze the target audience and build the sales narrative.',
         personality: 'Strategic, persuasive, and market-savvy.',
         isPlayer: false,
-        color: '#EF52BA',
+        color: '#EC4899',
       },
       {
         index: 5,
@@ -98,7 +98,7 @@ export const AGENT_SETS: AgentSet[] = [
         mission: 'Act as the final filter, ensuring the plan is profitable and viable.',
         personality: 'Critical, realistic, and focused on return on investment.',
         isPlayer: false,
-        color: '#ef4444',
+        color: '#F97316',
       },
     ],
   },
@@ -109,7 +109,7 @@ export const AGENT_SETS: AgentSet[] = [
     companyName: 'Pixxel AI Games',
     companyType: 'Indie Game Studio',
     companyDescription: 'A specialized game development studio focused on creating the next viral hit. Our goal is to craft the perfect prompt for a groundbreaking game.',
-    color: '#22c55e',
+    color: '#06B6D4',
     agents: [
       {
         index: 0,
@@ -129,7 +129,7 @@ export const AGENT_SETS: AgentSet[] = [
         mission: 'Turn raw ideas into structured game mechanics and loop systems.',
         personality: 'Analytical, visionary, and balanced.',
         isPlayer: false,
-        color: '#22c55e',
+        color: '#06B6D4',
       },
       {
         index: 2,
@@ -139,7 +139,7 @@ export const AGENT_SETS: AgentSet[] = [
         mission: 'Ensure the game concept is technically feasible and translate it into a high-fidelity generation prompt.',
         personality: 'Calculated, tech-obsessed, and precise.',
         isPlayer: false,
-        color: '#4DECAC',
+        color: '#A78BFA',
       },
     ],
   },
@@ -150,7 +150,7 @@ export const AGENT_SETS: AgentSet[] = [
     companyName: 'SonicAI Bloom Records',
     companyType: 'Music Promotion & Production',
     companyDescription: 'A musical agency dedicated to composing the perfect song prompt by harmonizing rhythm, melody, and lyrics.',
-    color: '#E97B21',
+    color: '#F59E0B',
     agents: [
       {
         index: 0,
@@ -170,7 +170,7 @@ export const AGENT_SETS: AgentSet[] = [
         mission: 'Coordinate the rhythmic, harmonic, and lyrical specialists to realize the artist\'s vision.',
         personality: 'Experienced, visionary, and a natural leader.',
         isPlayer: false,
-        color: '#E97B21',
+        color: '#F59E0B',
       },
       {
         index: 2,
@@ -180,7 +180,7 @@ export const AGENT_SETS: AgentSet[] = [
         mission: 'Define the rhythmic foundation and energy of the track.',
         personality: 'High-energy, focused on the "feel" and timing.',
         isPlayer: false,
-        color: '#BFE543',
+        color: '#84CC16',
       },
       {
         index: 3,
@@ -190,7 +190,7 @@ export const AGENT_SETS: AgentSet[] = [
         mission: 'Build the harmonic structure and emotional depth of the song.',
         personality: 'Sophisticated, attentive to detail, and atmospheric.',
         isPlayer: false,
-        color: '#F7E77C',
+        color: '#FCD34D',
       },
       {
         index: 4,
@@ -200,7 +200,7 @@ export const AGENT_SETS: AgentSet[] = [
         mission: 'Craft a memorable and catchy melodic hook that defines the song.',
         personality: 'Creative, intuitive, and focused on catchiness.',
         isPlayer: false,
-        color: '#DDC733',
+        color: '#FB923C',
       },
       {
         index: 5,
@@ -210,7 +210,7 @@ export const AGENT_SETS: AgentSet[] = [
         mission: 'Write powerful, evocative lyrics that resonate with the audience.',
         personality: 'Poetic, profound, and weight-conscious wordsmith.',
         isPlayer: false,
-        color: '#FFB077',
+        color: '#F87171',
       },
     ],
   },

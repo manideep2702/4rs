@@ -341,6 +341,10 @@ async function updateAgentSummary(agentIndex: number) {
     const llmConfig = useStore.getState().llmConfig;
     try {
         const provider = LLMFactory.getProvider(llmConfig);
+        const summaryPrompt = [
+            ...history.slice(0, -4),
+            { role: 'user' as const, content: 'Please summarize the conversation so far in a concise paragraph, capturing the key decisions, progress, and any outstanding tasks.' }
+        ];
         const response = await provider.generateCompletion(summaryPrompt, [], 'You are an AI assistant helping an agent summarize their conversation history.', llmConfig.model);
         if (response.content) {
             store.setAgentSummary(agentIndex, response.content);

@@ -13,7 +13,7 @@ export class OpenAICompatibleProvider implements LLMProvider {
     messages: LLMMessage[],
     tools?: LLMToolDefinition[],
     systemInstruction?: string,
-    modelName: string = 'qwen-plus',
+    modelName: string = 'qwen-turbo',
     signal?: AbortSignal
   ): Promise<LLMResponse> {
     const openaiMessages: any[] = [];

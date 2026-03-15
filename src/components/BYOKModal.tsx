@@ -11,7 +11,7 @@ const STORAGE_KEY = 'byok-config';
 
 const PROVIDERS = [
   { id: 'gemini', label: 'Gemini', model: 'gemini-2.5-flash', enabled: true },
-  { id: 'qwen', label: 'Qwen', model: 'qwen-plus', enabled: true },
+  { id: 'qwen', label: 'Qwen', model: 'qwen-turbo', enabled: true },
   { id: 'openai', label: 'OpenAI', model: 'gpt-4o', enabled: false },
   { id: 'anthropic', label: 'Anthropic', model: 'claude-opus-4-5', enabled: false },
 ] as const;

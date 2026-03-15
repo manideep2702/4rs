@@ -42,24 +42,35 @@ export class Stage {
   }
 
   private setupLights() {
-    // Keep ambient low so directional shadows have visible contrast
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1 * Math.PI);
+    // Hemisphere light: sky (warm white) → ground (warm beige bounce)
+    const hemiLight = new THREE.HemisphereLight(0xFFF8F0, 0xD4C4A8, 0.8 * Math.PI);
+    this.scene.add(hemiLight);
+
+    // Soft ambient fill — reduced since hemi picks up the slack
+    const ambientLight = new THREE.AmbientLight(0xFFF5E8, 0.5 * Math.PI);
     this.scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.5 * Math.PI);
+    // Primary sunlight — warm golden-white from upper right
+    const dirLight = new THREE.DirectionalLight(0xFFF4E0, 0.55 * Math.PI);
     dirLight.position.set(10, 20, 10);
     dirLight.castShadow = true;
     dirLight.shadow.camera.near = 0.1;
     dirLight.shadow.camera.far = 100;
-    dirLight.shadow.camera.top = 10;
-    dirLight.shadow.camera.bottom = -10;
-    dirLight.shadow.camera.right = 10;
-    dirLight.shadow.camera.left = -10;
+    dirLight.shadow.camera.top = 12;
+    dirLight.shadow.camera.bottom = -12;
+    dirLight.shadow.camera.right = 12;
+    dirLight.shadow.camera.left = -12;
     dirLight.shadow.mapSize.set(2048, 2048);
     dirLight.shadow.bias = -0.0001;
-    dirLight.shadow.radius = 2;
+    dirLight.shadow.radius = 3;
     dirLight.shadow.autoUpdate = true;
     this.scene.add(dirLight);
+
+    // Soft blue-tinted fill light from opposite side for depth
+    const fillLight = new THREE.DirectionalLight(0xD0E8FF, 0.15 * Math.PI);
+    fillLight.position.set(-8, 10, -8);
+    fillLight.castShadow = false;
+    this.scene.add(fillLight);
   }
 
   public onResize(width: number, height: number) {
