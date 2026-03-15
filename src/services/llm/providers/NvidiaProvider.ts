@@ -1,8 +1,6 @@
 import { LLMProvider, LLMMessage, LLMToolDefinition, LLMResponse, LLMToolCall } from '../types';
 
-const NVIDIA_BASE_URL = import.meta.env.DEV
-  ? '/nvidia-api/v1'
-  : 'https://integrate.api.nvidia.com/v1';
+const NVIDIA_BASE_URL = '/nvidia-api/v1';
 
 export class NvidiaProvider implements LLMProvider {
   private apiKey: string;
