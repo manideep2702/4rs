@@ -42,16 +42,16 @@ export class Stage {
   }
 
   private setupLights() {
-    // Hemisphere light: sky (warm white) → ground (warm beige bounce)
-    const hemiLight = new THREE.HemisphereLight(0xFFF8F0, 0xD4C4A8, 0.8 * Math.PI);
+    // Hemisphere light: sky blue → green ground bounce
+    const hemiLight = new THREE.HemisphereLight(0x6DD5FA, 0x84C57A, 0.7 * Math.PI);
     this.scene.add(hemiLight);
 
-    // Soft ambient fill — reduced since hemi picks up the slack
-    const ambientLight = new THREE.AmbientLight(0xFFF5E8, 0.5 * Math.PI);
+    // Soft ambient fill
+    const ambientLight = new THREE.AmbientLight(0xE8F4FF, 0.4 * Math.PI);
     this.scene.add(ambientLight);
 
-    // Primary sunlight — warm golden-white from upper right
-    const dirLight = new THREE.DirectionalLight(0xFFF4E0, 0.55 * Math.PI);
+    // Primary sunlight — bright white from upper right
+    const dirLight = new THREE.DirectionalLight(0xFFFFFF, 0.55 * Math.PI);
     dirLight.position.set(10, 20, 10);
     dirLight.castShadow = true;
     dirLight.shadow.camera.near = 0.1;
@@ -66,11 +66,25 @@ export class Stage {
     dirLight.shadow.autoUpdate = true;
     this.scene.add(dirLight);
 
-    // Soft blue-tinted fill light from opposite side for depth
-    const fillLight = new THREE.DirectionalLight(0xD0E8FF, 0.15 * Math.PI);
-    fillLight.position.set(-8, 10, -8);
-    fillLight.castShadow = false;
-    this.scene.add(fillLight);
+    // Warm orange accent from the left
+    const orangeLight = new THREE.PointLight(0xFF8C42, 1.2 * Math.PI, 20);
+    orangeLight.position.set(-6, 4, 4);
+    this.scene.add(orangeLight);
+
+    // Cool cyan accent from the right-back
+    const cyanLight = new THREE.PointLight(0x00E5FF, 0.8 * Math.PI, 18);
+    cyanLight.position.set(6, 3, -6);
+    this.scene.add(cyanLight);
+
+    // Purple accent from the back center — adds depth
+    const purpleLight = new THREE.PointLight(0xC77DFF, 0.7 * Math.PI, 15);
+    purpleLight.position.set(0, 5, -8);
+    this.scene.add(purpleLight);
+
+    // Pink-magenta fill from the front
+    const pinkLight = new THREE.PointLight(0xFF4DA6, 0.5 * Math.PI, 14);
+    pinkLight.position.set(0, 3, 10);
+    this.scene.add(pinkLight);
   }
 
   public onResize(width: number, height: number) {
