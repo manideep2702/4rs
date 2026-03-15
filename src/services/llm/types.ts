@@ -26,7 +26,7 @@ export interface LLMToolDefinition {
 }
 
 export interface LLMConfig {
-  provider: 'gemini' | 'openai' | 'anthropic' | 'qwen' | 'local';
+  provider: 'gemini' | 'openai' | 'anthropic' | 'qwen' | 'local' | 'nvidia';
   apiKey?: string;
   baseUrl?: string;
   model: string;
