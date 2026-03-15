@@ -4,7 +4,9 @@ import { LLMProvider, LLMConfig } from './types';
 
 const QWEN_BASE_URL = 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1';
 const OPENAI_BASE_URL = 'https://api.openai.com/v1';
-const NVIDIA_BASE_URL = 'https://integrate.api.nvidia.com/v1';
+const NVIDIA_BASE_URL = import.meta.env.DEV
+  ? '/nvidia-api/v1'
+  : 'https://integrate.api.nvidia.com/v1';
 
 export class LLMFactory {
   static getProvider(config: LLMConfig): LLMProvider {
