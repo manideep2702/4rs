@@ -18,6 +18,7 @@ export interface AgentData {
   personality: string;
   isPlayer: boolean;
   color: string;
+  dressColor: string;
 }
 
 export interface AgentSet {
@@ -51,6 +52,7 @@ export const AGENT_SETS: AgentSet[] = [
         personality: 'Demanding but open to professional suggestions.',
         isPlayer: true,
         color: '#7EACEA',
+        dressColor: '#3D5A80',
       },
       {
         index: 1,
@@ -62,6 +64,7 @@ export const AGENT_SETS: AgentSet[] = [
         personality: 'Organized, efficient, and central orchestrator.',
         isPlayer: false,
         color: '#7C3AED',
+        dressColor: '#1A1A2E',
       },
       {
         index: 2,
@@ -73,6 +76,7 @@ export const AGENT_SETS: AgentSet[] = [
         personality: 'Creative, detail-oriented, and focused on visual harmony.',
         isPlayer: false,
         color: '#F59E0B',
+        dressColor: '#B0B0C0',
       },
       {
         index: 3,
@@ -84,6 +88,7 @@ export const AGENT_SETS: AgentSet[] = [
         personality: 'Pragmatic, technical, and focused on robustness.',
         isPlayer: false,
         color: '#10B981',
+        dressColor: '#1A2030',
       },
       {
         index: 4,
@@ -95,6 +100,7 @@ export const AGENT_SETS: AgentSet[] = [
         personality: 'Strategic, persuasive, and market-savvy.',
         isPlayer: false,
         color: '#EC4899',
+        dressColor: '#C8A97A',
       },
       {
         index: 5,
@@ -106,6 +112,7 @@ export const AGENT_SETS: AgentSet[] = [
         personality: 'Critical, realistic, and focused on return on investment.',
         isPlayer: false,
         color: '#F97316',
+        dressColor: '#1A2050',
       },
     ],
   },
@@ -128,6 +135,7 @@ export const AGENT_SETS: AgentSet[] = [
         personality: 'Passionate gamer, imaginative, and focused on "fun factor".',
         isPlayer: true,
         color: '#7EACEA',
+        dressColor: '#3D5A80',
       },
       {
         index: 1,
@@ -139,6 +147,7 @@ export const AGENT_SETS: AgentSet[] = [
         personality: 'Analytical, visionary, and balanced.',
         isPlayer: false,
         color: '#06B6D4',
+        dressColor: '#0E3A47',
       },
       {
         index: 2,
@@ -150,6 +159,7 @@ export const AGENT_SETS: AgentSet[] = [
         personality: 'Calculated, tech-obsessed, and precise.',
         isPlayer: false,
         color: '#A78BFA',
+        dressColor: '#2D1B4E',
       },
     ],
   },
@@ -172,6 +182,7 @@ export const AGENT_SETS: AgentSet[] = [
         personality: 'Expressive, emotional, and creatively driven.',
         isPlayer: true,
         color: '#7EACEA',
+        dressColor: '#3D5A80',
       },
       {
         index: 1,
@@ -183,6 +194,7 @@ export const AGENT_SETS: AgentSet[] = [
         personality: 'Experienced, visionary, and a natural leader.',
         isPlayer: false,
         color: '#F59E0B',
+        dressColor: '#5C3A00',
       },
       {
         index: 2,
@@ -194,6 +206,7 @@ export const AGENT_SETS: AgentSet[] = [
         personality: 'High-energy, focused on the "feel" and timing.',
         isPlayer: false,
         color: '#84CC16',
+        dressColor: '#2A3A00',
       },
       {
         index: 3,
@@ -205,6 +218,7 @@ export const AGENT_SETS: AgentSet[] = [
         personality: 'Sophisticated, attentive to detail, and atmospheric.',
         isPlayer: false,
         color: '#FCD34D',
+        dressColor: '#8B6914',
       },
       {
         index: 4,
@@ -216,6 +230,7 @@ export const AGENT_SETS: AgentSet[] = [
         personality: 'Creative, intuitive, and focused on catchiness.',
         isPlayer: false,
         color: '#FB923C',
+        dressColor: '#5C2200',
       },
       {
         index: 5,
@@ -227,6 +242,7 @@ export const AGENT_SETS: AgentSet[] = [
         personality: 'Poetic, profound, and weight-conscious wordsmith.',
         isPlayer: false,
         color: '#F87171',
+        dressColor: '#6B0000',
       },
     ],
   },
@@ -249,6 +265,7 @@ export const AGENT_SETS: AgentSet[] = [
         personality: 'Sophisticated palate, curious about new flavors.',
         isPlayer: true,
         color: '#7EACEA',
+        dressColor: '#3D5A80',
       },
       {
         index: 1,
@@ -260,6 +277,7 @@ export const AGENT_SETS: AgentSet[] = [
         personality: 'Passionate, slightly temperamental, but a genius with ingredients.',
         isPlayer: false,
         color: '#EF52BA',
+        dressColor: '#1A1A1A',
       },
       {
         index: 2,
@@ -271,6 +289,7 @@ export const AGENT_SETS: AgentSet[] = [
         personality: 'Refined, eloquent, and obsessed with vintage.',
         isPlayer: false,
         color: '#F7A4EA',
+        dressColor: '#1A0A30',
       },
       {
         index: 3,
@@ -282,6 +301,7 @@ export const AGENT_SETS: AgentSet[] = [
         personality: 'Aesthetic-focused, avant-garde, and detail-oriented.',
         isPlayer: false,
         color: '#FEC7F2',
+        dressColor: '#1A1A1A',
       },
     ],
   },

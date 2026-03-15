@@ -20,7 +20,9 @@ import {
   texture,
   sin,
   cos,
-  uv
+  uv,
+  smoothstep,
+  mix
 } from 'three/tsl';
 import { ExpressionKey, AnimationName, AgentBehavior } from '../../types';
 import { DRACO_LIB_PATH } from '../constants';
@@ -38,6 +40,7 @@ export class CharacterManager {
   private posAttribute: THREE.StorageInstancedBufferAttribute | null = null;
   private velAttribute: THREE.StorageInstancedBufferAttribute | null = null;
   private colorAttribute: THREE.InstancedBufferAttribute | null = null;
+  private pantsColorAttribute: THREE.InstancedBufferAttribute | null = null;
   private positionStorage: any;
   private velocityStorage: any;
 
@@ -205,6 +208,7 @@ export class CharacterManager {
     this.instancedMeshes = [];
     this.computeNode = null;
     this.expressionBuffer = null;
+    this.pantsColorAttribute = null;
   }
 
   private initInstances() {
@@ -213,6 +217,7 @@ export class CharacterManager {
     const posArray = new Float32Array(this.instanceCount * 4);
     const velArray = new Float32Array(this.instanceCount * 4);
     const colorArray = new Float32Array(this.instanceCount * 3);
+    const pantsColorArray = new Float32Array(this.instanceCount * 3);
 
     const tempColor = new THREE.Color();
     const spawnRadius = 8; // Default spawn area
@@ -256,6 +261,12 @@ export class CharacterManager {
         colorArray[i * 3 + 0] = tempColor.r;
         colorArray[i * 3 + 1] = tempColor.g;
         colorArray[i * 3 + 2] = tempColor.b;
+
+        const dressColor = agent.dressColor || '#1A1A2E';
+        tempColor.set(dressColor);
+        pantsColorArray[i * 3 + 0] = tempColor.r;
+        pantsColorArray[i * 3 + 1] = tempColor.g;
+        pantsColorArray[i * 3 + 2] = tempColor.b;
     }
 
     this.debugPosArray = new Float32Array(posArray);
@@ -263,6 +274,7 @@ export class CharacterManager {
     this.posAttribute = new THREE.StorageInstancedBufferAttribute(posArray, 4);
     this.velAttribute = new THREE.StorageInstancedBufferAttribute(velArray, 4);
     this.colorAttribute = new THREE.InstancedBufferAttribute(colorArray, 3);
+    this.pantsColorAttribute = new THREE.InstancedBufferAttribute(pantsColorArray, 3);
 
     this.positionStorage = storage(this.posAttribute, 'vec4', this.instanceCount);
     this.velocityStorage = storage(this.velAttribute, 'vec4', this.instanceCount);
@@ -352,6 +364,7 @@ export class CharacterManager {
 
       // Solo dejamos el atributo que NO se calcula en el Compute Shader
       if (this.colorAttribute) instancedGeometry.setAttribute('instanceColor', this.colorAttribute);
+      if (this.pantsColorAttribute) instancedGeometry.setAttribute('instancePants', this.pantsColorAttribute);
 
       const material = new THREE.MeshStandardNodeMaterial();
       material.roughness = 1;
@@ -378,11 +391,15 @@ export class CharacterManager {
       if (name.toLowerCase().includes('body')) {
         material.depthWrite = true;
         material.depthTest = true;
+        const pantsColor = attribute('instancePants', 'vec3');
+        // positionLocal.y: ~1.8=head, ~0.85=waist, ~0=feet
+        const shirtMask = smoothstep(float(0.75), float(0.95), positionLocal.y);
+        const bodyColor = mix(pantsColor, instanceColor, shirtMask);
         if (map) {
           const texColor = texture(map);
-          material.colorNode = vec4(texColor.rgb.mul(instanceColor), texColor.a.mul(instanceAlpha));
+          material.colorNode = vec4(texColor.rgb.mul(bodyColor), texColor.a.mul(instanceAlpha));
         } else {
-          material.colorNode = vec4(instanceColor, instanceAlpha);
+          material.colorNode = vec4(bodyColor, instanceAlpha);
         }
       } else {
         // Eyes / mouth: rendered on top of the body surface with polygon offset to avoid
