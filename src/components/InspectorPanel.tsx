@@ -53,13 +53,13 @@ const InspectorPanel: React.FC<InspectorPanelProps> = ({ isFloating }) => {
   };
 
   return (
-    <div className={`${isFloating ? 'w-full h-full max-h-[85vh] self-end rounded-2xl shadow-2xl border border-white/20' : 'w-80 h-full border-l border-zinc-100'} bg-white flex flex-col pointer-events-auto shrink-0 relative z-30 overflow-hidden transition-all duration-300`}>
+    <div className={`${isFloating ? 'w-full h-full max-h-[85vh] self-end rounded-2xl shadow-2xl border border-white/20' : 'w-80 h-full border-l border-zinc-100 dark:border-zinc-800'} bg-white dark:bg-zinc-900 flex flex-col pointer-events-auto shrink-0 relative z-30 overflow-hidden transition-all duration-300`}>
       {!agent ? (
         !isFloating && <ProjectView />
       ) : (
         <>
           {/* Header with Role and Department */}
-          <div className={`p-4 pb-1 border-b border-zinc-50 bg-white ${isFloating ? 'bg-zinc-50/50' : ''}`}>
+          <div className={`p-4 pb-1 border-b border-zinc-50 dark:border-zinc-800 bg-white dark:bg-zinc-900 ${isFloating ? 'bg-zinc-50/50' : ''}`}>
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -68,14 +68,14 @@ const InspectorPanel: React.FC<InspectorPanelProps> = ({ isFloating }) => {
                       className="w-2 h-2 rounded-full"
                       style={{ backgroundColor: agent.color }}
                     />
-                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
                       {agent.department}
                     </p>
                   </div>
-                  <h2 className="text-xl font-black text-zinc-900 leading-tight">
+                  <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50 leading-tight">
                     {agent.name}
                   </h2>
-                  <p className="text-[11px] font-semibold text-zinc-400 leading-tight mt-0.5">
+                  <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 leading-tight mt-0.5">
                     {agent.role}
                   </p>
                 </div>
@@ -102,7 +102,7 @@ const InspectorPanel: React.FC<InspectorPanelProps> = ({ isFloating }) => {
                 </div>
               )}
               {needsDiscussion && !isChatting ? (
-                <div className="flex flex-col gap-3 p-4 bg-zinc-50 border border-zinc-100 rounded-xl animate-in fade-in slide-in-from-top-1 shadow-sm">
+                <div className="flex flex-col gap-3 p-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-xl animate-in fade-in slide-in-from-top-1 shadow-sm">
                   <div className="flex items-center gap-1.5">
                     <div className="flex items-center justify-center w-5 h-5 bg-blue-500 rounded-md text-white">
                       <MessageSquare size={12} strokeWidth={3} />
@@ -110,12 +110,12 @@ const InspectorPanel: React.FC<InspectorPanelProps> = ({ isFloating }) => {
                     <span className="text-[10px] font-black uppercase tracking-wider text-blue-500">Needs Discussion</span>
                   </div>
                   <div className="flex flex-col gap-2">
-                    <p className="text-[12px] font-bold text-zinc-900 leading-tight">
+                    <p className="text-[12px] font-bold text-zinc-900 dark:text-zinc-50 leading-tight">
                       {isOrchestratorIdle
                         ? "Discuss the project briefing with the team."
                         : `"${tasks.find(t => t.assignedAgentIds.includes(agent.index) && t.status === 'on_hold')?.title || 'This task'} is waiting for your input to proceed."`}
                     </p>
-                    <p className="text-[10px] text-zinc-400 italic">Waiting for your input to proceed.</p>
+                    <p className="text-[10px] text-zinc-400 dark:text-zinc-500 italic">Waiting for your input to proceed.</p>
                     <button
                       onClick={handleStartChat}
                       disabled={!canChat}
@@ -173,14 +173,14 @@ const InspectorPanel: React.FC<InspectorPanelProps> = ({ isFloating }) => {
             </div>
           </div>
 
-          <div className={`flex-1 overflow-y-auto relative min-h-0 ${isFloating ? 'bg-white' : 'bg-zinc-50/30'}`}>
+          <div className={`flex-1 overflow-y-auto relative min-h-0 ${isFloating ? 'bg-white dark:bg-zinc-900' : 'bg-zinc-50/30 dark:bg-zinc-800/30'}`}>
             {isChatting ? (
-              <div className="flex flex-col h-full bg-white">
+              <div className="flex flex-col h-full bg-white dark:bg-zinc-900">
                 <div className="flex-1 overflow-y-auto">
                   <ChatPanel />
                 </div>
                 {/* Close Chat button at the bottom when chatting */}
-                <div className="p-3 bg-white border-t border-zinc-100 flex-shrink-0">
+                <div className="p-3 bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800 flex-shrink-0">
                   <button
                     onClick={handleEndChat}
                     className="w-full h-10 px-4 bg-zinc-900 hover:bg-black text-white rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 text-[10px] font-black uppercase tracking-widest shadow-md"

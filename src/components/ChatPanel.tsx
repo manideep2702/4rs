@@ -99,7 +99,7 @@ const ChatPanel: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-full bg-white relative overflow-hidden shrink-0 pointer-events-auto">
+    <div className="flex flex-col h-full bg-white dark:bg-zinc-900 relative overflow-hidden shrink-0 pointer-events-auto">
       {/* Messages */}
       <div
         ref={scrollRef}
@@ -131,8 +131,8 @@ const ChatPanel: React.FC = () => {
 
                 <div className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
                   <div className={`px-4 py-2.5 rounded-[20px] text-[14px] leading-relaxed shadow-sm ${msg.role === 'user'
-                      ? 'bg-blue-50/50 text-zinc-800 rounded-tr-none border border-blue-100/50'
-                      : 'bg-zinc-50 text-zinc-800 rounded-tl-none border border-zinc-100'
+                      ? 'bg-blue-50/50 text-zinc-800 dark:text-zinc-200 rounded-tr-none border border-blue-100/50'
+                      : 'bg-zinc-50 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-tl-none border border-zinc-100 dark:border-zinc-700'
                     }`}>
                     {msg.role === 'assistant' ? (
                       <div className="markdown-content">
@@ -167,7 +167,7 @@ const ChatPanel: React.FC = () => {
                 <path d="M12 2L14.85 9.15L22 12L14.85 14.85L12 22L9.15 14.85L2 12L9.15 9.15L12 2Z" />
               </svg>
             </div>
-            <div className="bg-zinc-50 px-4 py-3 rounded-2xl rounded-tl-none">
+            <div className="bg-zinc-50 dark:bg-zinc-800 px-4 py-3 rounded-2xl rounded-tl-none">
               <div className="flex gap-1">
                 <div className="w-1.5 h-1.5 bg-zinc-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                 <div className="w-1.5 h-1.5 bg-zinc-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -179,7 +179,7 @@ const ChatPanel: React.FC = () => {
       </div>
 
       {/* Input */}
-      <div className="p-2 border-t border-zinc-50">
+      <div className="p-2 border-t border-zinc-50 dark:border-zinc-800">
         <div className="relative flex items-center gap-2">
           <div className="flex-1 relative">
             <textarea
@@ -205,7 +205,7 @@ const ChatPanel: React.FC = () => {
                 }
               }}
               placeholder="Message (↵ to send)"
-              className="w-full bg-white border border-zinc-200 rounded-2xl px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all resize-none pr-12 [scrollbar-width:none]"
+              className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 rounded-2xl px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all resize-none pr-12 [scrollbar-width:none]"
             />
           </div>
           <button

@@ -61,12 +61,12 @@ function TaskCard({ task }: { task: Task; key?: string }) {
   };
 
   return (
-    <div key={task.id} className="bg-white rounded-lg border border-black/5 shadow-sm p-3 space-y-2 group relative">
+    <div key={task.id} className="bg-white dark:bg-zinc-900 rounded-lg border border-black/5 dark:border-zinc-700 shadow-sm p-3 space-y-2 group relative">
       <div
         className="flex items-start justify-between gap-1 cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <h3 className="text-xs text-zinc-900 leading-snug font-bold flex-1">
+        <h3 className="text-xs text-zinc-900 dark:text-zinc-100 leading-snug font-bold flex-1">
           {task.title || 'Untitled Task'}
         </h3>
         <div className="flex items-center gap-1">
@@ -106,7 +106,7 @@ function TaskCard({ task }: { task: Task; key?: string }) {
       </div>
 
       {isExpanded && (
-        <p className="text-[11px] text-zinc-500 leading-relaxed bg-zinc-50/50 p-2 rounded border border-black/5 animate-in fade-in slide-in-from-top-1 duration-200">
+        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed bg-zinc-50/50 dark:bg-zinc-800/50 p-2 rounded border border-black/5 dark:border-zinc-700 animate-in fade-in slide-in-from-top-1 duration-200">
           {task.description}
         </p>
       )}
@@ -128,11 +128,11 @@ export function KanbanPanel({ height = 320 }: KanbanPanelProps) {
 
   return (
     <div
-      className="w-full bg-white border-t border-black/8 flex flex-col pointer-events-auto shrink-0 relative"
+      className="w-full bg-white dark:bg-zinc-900 border-t border-black/8 dark:border-zinc-700 flex flex-col pointer-events-auto shrink-0 relative"
       style={{ height }}
     >
       {/* Columns Scroll Area */}
-      <div className="flex-1 overflow-x-auto overflow-y-hidden bg-zinc-50/20">
+      <div className="flex-1 overflow-x-auto overflow-y-hidden bg-zinc-50/20 dark:bg-zinc-800/20">
         <div className="flex h-full min-w-max px-5 py-4 gap-4">
           {COLUMNS.map(({ status, label }) => {
             const colTasks = tasks.filter((t) => t.status === status)
@@ -140,10 +140,10 @@ export function KanbanPanel({ height = 320 }: KanbanPanelProps) {
               <div key={status} className="w-60 flex flex-col gap-3">
                 <div className="flex items-center justify-between shrink-0 select-none">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 leading-none">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 leading-none">
                       {label}
                     </span>
-                    <span className="px-1.5 py-0.5 bg-zinc-100 text-zinc-400 text-[9px] font-bold rounded-md min-w-4.5 text-center">
+                    <span className="px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-700 text-zinc-400 dark:text-zinc-400 text-[9px] font-bold rounded-md min-w-4.5 text-center">
                       {colTasks.length}
                     </span>
                   </div>
@@ -154,8 +154,8 @@ export function KanbanPanel({ height = 320 }: KanbanPanelProps) {
                     <TaskCard key={t.id} task={t} />
                   ))}
                   {colTasks.length === 0 && (
-                    <div className="border border-dashed border-zinc-100 rounded-lg p-4 flex items-center justify-center select-none">
-                      <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">Empty</span>
+                    <div className="border border-dashed border-zinc-100 dark:border-zinc-700 rounded-lg p-4 flex items-center justify-center select-none">
+                      <span className="text-[10px] font-bold text-zinc-300 dark:text-zinc-600 uppercase tracking-widest">Empty</span>
                     </div>
                   )}
                 </div>

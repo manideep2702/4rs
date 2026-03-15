@@ -70,17 +70,17 @@ ${entry.rawContent}
     `.trim();
 
     return (
-        <div className="border-b border-zinc-50 last:border-0 py-3 group">
+        <div className="border-b border-zinc-50 dark:border-zinc-800 last:border-0 py-3 group">
             <div className="flex items-center gap-1 mb-1 pr-1">
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="flex-1 flex items-center justify-between text-left hover:bg-zinc-50/50 rounded p-1 transition-colors cursor-pointer"
+                    className="flex-1 flex items-center justify-between text-left hover:bg-zinc-50/50 dark:hover:bg-zinc-800/50 rounded p-1 transition-colors cursor-pointer"
                 >
                     <div className="flex flex-col gap-1.5 w-full">
                         <div className="flex items-center justify-between w-full">
                             <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: agent?.color ?? '#ccc' }} />
-                                <span className="text-[10px] font-black text-zinc-800 uppercase tracking-widest leading-none">
+                                <span className="text-[10px] font-black text-zinc-800 dark:text-zinc-200 uppercase tracking-widest leading-none">
                                     {agent?.role}
                                 </span>
                                 <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-tighter ${
@@ -114,7 +114,7 @@ ${entry.rawContent}
             </div>
 
             {isOpen && (
-                <div className="mt-2 space-y-2 pl-4 border-l border-zinc-100">
+                <div className="mt-2 space-y-2 pl-4 border-l border-zinc-100 dark:border-zinc-700">
                     {/* System Prompt — collapsed by default */}
                     <details className="group/sp">
                         <summary className="flex items-center justify-between gap-1.5 py-1 cursor-pointer list-none">
@@ -127,7 +127,7 @@ ${entry.rawContent}
                                 <CopyButton text={entry.systemPrompt} />
                             </div>
                         </summary>
-                        <pre className="mt-1.5 text-[10px] bg-zinc-50 p-2 rounded leading-relaxed text-zinc-600 whitespace-pre-wrap font-mono border border-zinc-100/50">
+                        <pre className="mt-1.5 text-[10px] bg-zinc-50 dark:bg-zinc-800 p-2 rounded leading-relaxed text-zinc-600 dark:text-zinc-300 whitespace-pre-wrap font-mono border border-zinc-100/50 dark:border-zinc-700/50">
                             {entry.systemPrompt}
                         </pre>
                     </details>
@@ -165,8 +165,8 @@ ${entry.rawContent}
                                     <>
                                         {/* Formatted Text Content */}
                                         {parsedResponse.text && (
-                                            <div className="text-[11px] bg-white p-3 rounded leading-relaxed text-zinc-700 border border-zinc-100 shadow-sm relative italic whitespace-pre-wrap">
-                                                <div className="absolute -top-2 left-2 bg-white px-1 text-[8px] font-black uppercase text-zinc-400 border border-zinc-100 rounded">Text</div>
+                                            <div className="text-[11px] bg-white dark:bg-zinc-800 p-3 rounded leading-relaxed text-zinc-700 dark:text-zinc-300 border border-zinc-100 dark:border-zinc-700 shadow-sm relative italic whitespace-pre-wrap">
+                                                <div className="absolute -top-2 left-2 bg-white dark:bg-zinc-800 px-1 text-[8px] font-black uppercase text-zinc-400 dark:text-zinc-500 border border-zinc-100 dark:border-zinc-700 rounded">Text</div>
                                                 {parsedResponse.text}
                                             </div>
                                         )}
@@ -213,19 +213,19 @@ ${entry.rawContent}
                                         {/* Raw JSON fallback */}
                                         <details className="mt-2">
                                             <summary className="text-[8px] font-bold text-zinc-300 uppercase cursor-pointer hover:text-zinc-500 transition-colors ml-1">View Full Raw JSON</summary>
-                                            <pre className="mt-1 text-[9px] bg-zinc-50/50 p-2 rounded text-zinc-400 whitespace-pre overflow-x-auto border border-zinc-100 font-mono">
+                                            <pre className="mt-1 text-[9px] bg-zinc-50/50 dark:bg-zinc-800/50 p-2 rounded text-zinc-400 dark:text-zinc-500 whitespace-pre overflow-x-auto border border-zinc-100 dark:border-zinc-700 font-mono">
                                                 {entry.rawContent}
                                             </pre>
                                         </details>
                                     </>
                                 ) : (
-                                    <pre className="text-[10px] bg-white p-2 rounded leading-relaxed text-zinc-600 whitespace-pre-wrap font-mono border border-zinc-100 shadow-sm">
+                                    <pre className="text-[10px] bg-white dark:bg-zinc-800 p-2 rounded leading-relaxed text-zinc-600 dark:text-zinc-300 whitespace-pre-wrap font-mono border border-zinc-100 dark:border-zinc-700 shadow-sm">
                                         {entry.rawContent}
                                     </pre>
                                 )}
                             </div>
                         ) : (
-                            <pre className="text-[10px] bg-white p-2 rounded leading-relaxed text-zinc-600 whitespace-pre-wrap font-mono border border-zinc-100 shadow-sm">
+                            <pre className="text-[10px] bg-white dark:bg-zinc-800 p-2 rounded leading-relaxed text-zinc-600 dark:text-zinc-300 whitespace-pre-wrap font-mono border border-zinc-100 dark:border-zinc-700 shadow-sm">
                                 {entry.rawContent}
                             </pre>
                         )}
@@ -239,7 +239,7 @@ ${entry.rawContent}
                             </div>
                             <div className="max-h-40 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
                                 {entry.messages.map((m, i) => (
-                                    <div key={i} className={`p-1.5 rounded text-[9px] ${m.role === 'user' ? 'bg-zinc-50 border border-zinc-100' : 'bg-emerald-50/30 border border-emerald-100/30'}`}>
+                                    <div key={i} className={`p-1.5 rounded text-[9px] ${m.role === 'user' ? 'bg-zinc-50 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700' : 'bg-emerald-50/30 border border-emerald-100/30'}`}>
                                         <div className="font-bold uppercase tracking-tighter mb-0.5 opacity-40">{m.role}</div>
                                         <div className="line-clamp-3 hover:line-clamp-none transition-all">{typeof m.content === 'string' ? m.content : JSON.stringify(m.content)}</div>
                                     </div>
@@ -312,11 +312,11 @@ ${entry.rawContent}
       : [...debugLog].reverse()
 
   return (
-    <div className="w-[320px] h-full bg-white border-r border-zinc-100 flex flex-col pointer-events-auto overflow-hidden shrink-0 relative">
+    <div className="w-[320px] h-full bg-white dark:bg-zinc-900 border-r border-zinc-100 dark:border-zinc-800 flex flex-col pointer-events-auto overflow-hidden shrink-0 relative">
           {/* Header */}
-          <div className="h-10 px-5 border-b border-zinc-100 flex items-center justify-between bg-white shrink-0 z-10">
+          <div className="h-10 px-5 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-white dark:bg-zinc-900 shrink-0 z-10">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Logs</span>
+              <span className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Logs</span>
               {filterAgent && (
                 <div
                   className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold text-white uppercase tracking-tighter animate-in fade-in zoom-in duration-200"
@@ -340,7 +340,7 @@ ${entry.rawContent}
                   className={`p-1.5 rounded transition-colors cursor-pointer ${
                     isFilterMenuOpen || logFilterAgentIndex !== null
                       ? 'bg-zinc-900 text-white'
-                      : 'text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50'
+                      : 'text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800'
                   }`}
                   title="Filter by agent"
                 >
@@ -353,20 +353,20 @@ ${entry.rawContent}
                       className="fixed inset-0 z-20"
                       onClick={() => setIsFilterMenuOpen(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-48 bg-white border border-zinc-100 rounded-xl shadow-xl z-30 py-1.5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl shadow-xl z-30 py-1.5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                       <button
                         onClick={() => {
                           setLogOpen(true, null);
                           setIsFilterMenuOpen(false);
                         }}
                         className={`w-full px-4 py-2 text-left text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-zinc-50 transition-colors ${
-                          logFilterAgentIndex === null ? 'text-zinc-900' : 'text-zinc-400'
+                          logFilterAgentIndex === null ? 'text-zinc-900 dark:text-zinc-50' : 'text-zinc-400 dark:text-zinc-500'
                         }`}
                       >
-                        <div className={`w-2 h-2 rounded-full ${logFilterAgentIndex === null ? 'bg-zinc-900' : 'bg-transparent border border-zinc-200'}`} />
+                        <div className={`w-2 h-2 rounded-full ${logFilterAgentIndex === null ? 'bg-zinc-900' : 'bg-transparent border border-zinc-200 dark:border-zinc-700'}`} />
                         All Agents
                       </button>
-                      <div className="h-px bg-zinc-50 my-1" />
+                      <div className="h-px bg-zinc-50 dark:bg-zinc-800 my-1" />
                       {agents.map((agent) => (
                         <button
                           key={agent.index}
@@ -374,8 +374,8 @@ ${entry.rawContent}
                             setLogOpen(true, agent.index);
                             setIsFilterMenuOpen(false);
                           }}
-                          className={`w-full px-4 py-2 text-left text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-zinc-50 transition-colors ${
-                            logFilterAgentIndex === agent.index ? 'text-zinc-900' : 'text-zinc-400'
+                          className={`w-full px-4 py-2 text-left text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors ${
+                            logFilterAgentIndex === agent.index ? 'text-zinc-900 dark:text-zinc-50' : 'text-zinc-400 dark:text-zinc-500'
                           }`}
                         >
                           <div
@@ -393,7 +393,7 @@ ${entry.rawContent}
               {activeTab === 'technical' && debugEntries.length > 0 && (
                 <button
                   onClick={handleDownloadAll}
-                  className="text-zinc-400 hover:text-zinc-900 transition-colors p-1 rounded hover:bg-zinc-50 cursor-pointer"
+                  className="text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors p-1 rounded hover:bg-zinc-50 dark:hover:bg-zinc-800 cursor-pointer"
                   title="Download all as .txt"
                 >
                   <Download size={14} />
@@ -403,11 +403,11 @@ ${entry.rawContent}
           </div>
 
           {/* Tab Switcher */}
-          <div className="flex border-b border-zinc-100 bg-zinc-50/30">
+          <div className="flex border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-800/30">
             <button
                 onClick={() => setActiveTab('activity')}
                 className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer ${
-                    activeTab === 'activity' ? 'bg-white border-b-2 border-zinc-900 text-zinc-900' : 'text-zinc-400 hover:text-zinc-600'
+                    activeTab === 'activity' ? 'bg-white dark:bg-zinc-900 border-b-2 border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-50' : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300'
                 }`}
             >
                 Activity
@@ -415,7 +415,7 @@ ${entry.rawContent}
             <button
                 onClick={() => setActiveTab('technical')}
                 className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer ${
-                    activeTab === 'technical' ? 'bg-white border-b-2 border-zinc-900 text-zinc-900' : 'text-zinc-400 hover:text-zinc-600'
+                    activeTab === 'technical' ? 'bg-white dark:bg-zinc-900 border-b-2 border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-50' : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300'
                 }`}
             >
                 Technical
@@ -440,7 +440,7 @@ ${entry.rawContent}
                             className="w-1.5 h-1.5 rounded-full shadow-sm"
                             style={{ backgroundColor: agent?.color ?? '#e4e4e7' }}
                           />
-                          <span className="text-[10px] font-black text-zinc-900 uppercase tracking-widest leading-none">
+                          <span className="text-[10px] font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-widest leading-none">
                             {agent?.role ?? 'System'}
                           </span>
                         </div>
@@ -449,8 +449,8 @@ ${entry.rawContent}
                         </span>
                       </div>
 
-                      <div className="pl-3.5 border-l border-zinc-50 group-hover:border-zinc-200 transition-colors">
-                        <p className="text-xs text-zinc-600 leading-relaxed font-medium">
+                      <div className="pl-3.5 border-l border-zinc-50 dark:border-zinc-800 group-hover:border-zinc-200 dark:group-hover:border-zinc-700 transition-colors">
+                        <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed font-medium">
                           {entry.action}
                         </p>
                       </div>

@@ -87,7 +87,7 @@ const App: React.FC = () => {
   return (
     <SceneContext.Provider value={sceneManager}>
       <AgencyOrchestrator />
-      <div className="w-screen h-screen bg-white overflow-hidden flex flex-col">
+      <div className="w-screen h-screen bg-white dark:bg-zinc-900 overflow-hidden flex flex-col">
         {/* Top: Header */}
         {!isFullscreen && <Header />}
 
@@ -96,16 +96,16 @@ const App: React.FC = () => {
           {isLogOpen && !isFullscreen && <ActionLogPanel />}
 
           {/* Center: canvas + kanban drawer stacked */}
-          <div className="relative flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden bg-zinc-50">
+          <div className="relative flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden bg-zinc-50 dark:bg-zinc-800">
             <SimulationView canvasRef={canvasRef} isFullscreen={isFullscreen} setIsFullscreen={setIsFullscreen} />
 
             {/* Resize Bar */}
             {isKanbanOpen && !isFullscreen && (
               <div
-                className={`h-2 hover:h-2 bg-transparent hover:bg-zinc-200 border-t border-black/5 transition-colors cursor-row-resize z-30 flex items-center justify-center group shrink-0 ${useAgencyStore.getState().isResizing ? 'bg-zinc-300' : ''}`}
+                className={`h-2 hover:h-2 bg-transparent hover:bg-zinc-200 dark:hover:bg-zinc-700 border-t border-black/5 dark:border-zinc-700 transition-colors cursor-row-resize z-30 flex items-center justify-center group shrink-0 ${useAgencyStore.getState().isResizing ? 'bg-zinc-300' : ''}`}
                 onMouseDown={startResizing}
               >
-                <div className="w-12 h-1 bg-zinc-300 rounded-full group-hover:bg-zinc-400" />
+                <div className="w-12 h-1 bg-zinc-300 dark:bg-zinc-600 rounded-full group-hover:bg-zinc-400 dark:group-hover:bg-zinc-500" />
               </div>
             )}
 

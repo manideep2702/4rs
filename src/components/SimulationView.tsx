@@ -30,13 +30,13 @@ const SimulationView: React.FC<SimulationViewProps> = ({ canvasRef, isFullscreen
   return (
     <div className="flex flex-col flex-1 min-w-0 min-h-0 relative">
       {/* Simulation View Header */}
-      <div className="h-14 border-b border-black/5 flex items-center justify-between px-5 bg-white shrink-0">
+      <div className="h-14 border-b border-black/5 dark:border-zinc-800 flex items-center justify-between px-5 bg-white dark:bg-zinc-900 shrink-0">
         <div className="flex-1 flex items-center gap-4">
           <div className="flex flex-col">
-            <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-tight">
+            <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest leading-tight">
               {activeSet.companyType}
             </span>
-            <span className="text-sm font-black text-zinc-900 leading-tight">
+            <span className="text-sm font-black text-zinc-900 dark:text-zinc-100 leading-tight">
               {activeSet.companyName}
             </span>
           </div>
@@ -49,7 +49,7 @@ const SimulationView: React.FC<SimulationViewProps> = ({ canvasRef, isFullscreen
             </span>
             <button
               onClick={() => setIsPickerOpen(true)}
-              className="flex items-center gap-1.5 px-2 py-1 bg-zinc-50 hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 rounded-md transition-all border border-zinc-100 hover:border-zinc-200 shrink-0"
+              className="flex items-center gap-1.5 px-2 py-1 bg-zinc-50 hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 rounded-md transition-all border border-zinc-100 hover:border-zinc-200 shrink-0 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:border-zinc-700 dark:text-zinc-400"
               title="Change team"
             >
               <Users size={11} />
@@ -66,8 +66,8 @@ const SimulationView: React.FC<SimulationViewProps> = ({ canvasRef, isFullscreen
               disabled={isPlaying}
               className={`p-1 border rounded transition-all cursor-pointer ${
                 isPlaying
-                  ? 'bg-zinc-50 text-zinc-300 border-zinc-100'
-                  : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50'
+                  ? 'bg-zinc-50 text-zinc-300 border-zinc-100 dark:bg-zinc-800 dark:border-zinc-700'
+                  : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50 dark:bg-zinc-900 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800'
               }`}
             >
               <Play size={14} fill="none" />
@@ -77,8 +77,8 @@ const SimulationView: React.FC<SimulationViewProps> = ({ canvasRef, isFullscreen
               disabled={!isPlaying}
               className={`p-1 border rounded transition-all cursor-pointer ${
                 !isPlaying
-                  ? 'bg-zinc-50 text-zinc-300 border-zinc-100'
-                  : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50'
+                  ? 'bg-zinc-50 text-zinc-300 border-zinc-100 dark:bg-zinc-800 dark:border-zinc-700'
+                  : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50 dark:bg-zinc-900 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800'
               }`}
             >
               <Pause size={14} fill="none" />
@@ -89,7 +89,7 @@ const SimulationView: React.FC<SimulationViewProps> = ({ canvasRef, isFullscreen
         <div className="flex-1 flex items-center justify-end gap-1">
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-2 text-zinc-400 hover:text-zinc-900 transition-colors cursor-pointer"
+            className="p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer"
             title={isFullscreen ? "Exit Fullscreen" : "Fullscreen Panel"}
           >
             {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
