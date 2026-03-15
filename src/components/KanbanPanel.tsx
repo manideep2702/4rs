@@ -6,6 +6,71 @@ import DeleteTaskModal from './DeleteTaskModal'
 import { useStore } from '../store/useStore'
 import { useElapsedTime } from '../hooks/useElapsedTime'
 
+function TaskOutputModal({ output, title, onClose }: { output: string; title: string; onClose: () => void }) {
+  const [showSource, setShowSource] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const isHtml = /^\s*(<(!DOCTYPE|html)|<[a-z])/i.test(output)
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(output)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleDownload = () => {
+    const ext = isHtml ? 'html' : 'txt'
+    const mime = isHtml ? 'text/html' : 'text/plain'
+    const blob = new Blob([output], { type: mime })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${title.toLowerCase().replace(/\s+/g, '-')}.${ext}`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-zinc-50 border border-black/10 rounded-2xl w-[90vw] max-w-[1200px] h-[85vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-black/5">
+          <div>
+            <h2 className="text-sm font-black uppercase tracking-widest text-zinc-800">{title}</h2>
+            <p className="text-[11px] text-zinc-400 mt-0.5">Task output</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {isHtml && (
+              <button
+                onClick={() => setShowSource(!showSource)}
+                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all ${showSource ? 'bg-zinc-800 text-white' : 'bg-zinc-200 text-zinc-600 hover:bg-zinc-300'}`}
+              >
+                {showSource ? 'Preview' : 'View Source'}
+              </button>
+            )}
+            <button onClick={onClose} className="text-zinc-400 hover:text-zinc-700 transition-colors text-lg leading-none ml-2">✕</button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-hidden">
+          {isHtml && !showSource ? (
+            <iframe srcDoc={output} title={title} className="w-full h-full border-0 bg-white" sandbox="allow-scripts allow-same-origin" />
+          ) : (
+            <pre className="w-full h-full overflow-auto px-6 py-4 bg-zinc-900 text-zinc-200 text-xs font-mono leading-relaxed whitespace-pre-wrap break-words">{output}</pre>
+          )}
+        </div>
+        <div className="px-6 py-4 border-t border-black/5 flex justify-end gap-3">
+          <button onClick={handleDownload} className="px-5 py-2.5 bg-zinc-200 text-zinc-800 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-zinc-300 active:scale-[0.98] transition-all">
+            Download
+          </button>
+          <button onClick={handleCopy} className="px-5 py-2.5 bg-zinc-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-black active:scale-[0.98] transition-all">
+            {copied ? 'Copied!' : 'Copy'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const COLUMNS: { status: TaskStatus; label: string }[] = [
   { status: 'scheduled', label: 'Scheduled' },
   { status: 'on_hold', label: 'On Hold' },
@@ -60,6 +125,7 @@ function WorkingTimer({ startMs }: { startMs: number }) {
 function TaskCard({ task }: { task: Task; key?: string }) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isOutputOpen, setIsOutputOpen] = useState(false)
   const { removeTask } = useAgencyStore()
   const { setSelectedNpc } = useStore()
 
@@ -133,6 +199,17 @@ function TaskCard({ task }: { task: Task; key?: string }) {
       </div>
       {task.status === 'in_progress' && (
         <WorkingTimer startMs={task.updatedAt} />
+      )}
+      {task.status === 'done' && task.output && (
+        <button
+          onClick={e => { e.stopPropagation(); setIsOutputOpen(true) }}
+          className="mt-1 w-full px-2 py-1.5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-black dark:hover:bg-white transition-all active:scale-[0.98]"
+        >
+          View Output
+        </button>
+      )}
+      {isOutputOpen && task.output && (
+        <TaskOutputModal output={task.output} title={task.title} onClose={() => setIsOutputOpen(false)} />
       )}
     </div>
   )
