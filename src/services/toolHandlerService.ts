@@ -153,6 +153,7 @@ export class ToolHandlerService {
         const { finalWebApp } = fn.args as { finalWebApp: string };
         store.setFinalOutput(finalWebApp);
         store.setPhase('done');
+        store.setFinalOutputOpen(true);
         store.addLogEntry({
           agentIndex: callerIndex,
           action: `delivered final web app to client`,
