@@ -14,11 +14,16 @@ import { getActiveAgentSet } from '../store/agencyStore'
 
 // ── Constants ─────────────────────────────────────────────────
 const ORCHESTRATOR_INDEX = 1 // Orchestrator
+const TASK_TIMEOUT_MS = 10 * 60 * 1000 // 10 minutes
 
 const randomBetween = (min: number, max: number) =>
   Math.random() * (max - min) + min
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
+
+class TaskTimeoutError extends Error {
+  constructor() { super('TASK_TIMEOUT') }
+}
 
 // ─────────────────────────────────────────────────────────────
 export function useAgencyOrchestrator() {
@@ -110,26 +115,36 @@ export function useAgencyOrchestrator() {
     sceneRef.current?.setNpcWorking(agentIndex, true)
 
     try {
-      const response = await callAgent({
-        agentIndex,
-        userMessage: `You have been assigned task [${task.id}]: "${task.description}". ` +
-          `First, analyze the task and call request_client_approval to discuss your plan with the client. ` +
-          `If the client approves, call complete_task with your final output.`,
-      })
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new TaskTimeoutError()), TASK_TIMEOUT_MS)
+      )
+      const response = await Promise.race([
+        callAgent({
+          agentIndex,
+          userMessage: `You have been assigned task [${task.id}]: "${task.description}". ` +
+            `First, analyze the task and call request_client_approval to discuss your plan with the client. ` +
+            `If the client approves, call complete_task with your final output.`,
+        }),
+        timeout,
+      ])
       if (response.functionCalls) {
         for (const fn of response.functionCalls) {
           processFunctionCall(fn, agentIndex)
         }
       }
     } catch (err) {
-      if ((err as DOMException)?.name !== 'AbortError') {
+      const isTimeout = err instanceof TaskTimeoutError
+      const isAbort = (err as DOMException)?.name === 'AbortError'
+      if (!isAbort) {
         console.error(`[Orchestrator] agent ${agentIndex} task error:`, err)
         const currentTask = useAgencyStore.getState().tasks.find(t => t.id === task.id)
         if (currentTask && currentTask.status === 'in_progress') {
           useAgencyStore.getState().updateTaskStatus(task.id, 'scheduled')
           useAgencyStore.getState().addLogEntry({
             agentIndex,
-            action: `task reset to scheduled after API error — will retry`,
+            action: isTimeout
+              ? `task timed out after 10 min — resetting to retry`
+              : `task reset to scheduled after API error — will retry`,
             taskId: task.id,
           })
         }
@@ -292,11 +307,17 @@ export function useAgencyOrchestrator() {
         sceneRef.current?.setNpcWorking(npcIndex, true)
 
         // Single combined call: incorporate feedback and complete
-        const response = await callAgent({
-          agentIndex: npcIndex,
-          userMessage: `Client responded: "${text}". Incorporate their feedback and produce your final prompt. ` +
-            `Call request_client_approval if you still need more input, if not Call complete_task with your output.`,
-        })
+        const timeout = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new TaskTimeoutError()), TASK_TIMEOUT_MS)
+        )
+        const response = await Promise.race([
+          callAgent({
+            agentIndex: npcIndex,
+            userMessage: `Client responded: "${text}". Incorporate their feedback and produce your final prompt. ` +
+              `Call request_client_approval if you still need more input, if not Call complete_task with your output.`,
+          }),
+          timeout,
+        ])
 
         if (response.functionCalls) {
           for (const fn of response.functionCalls) {
