@@ -137,6 +137,10 @@ export class NvidiaProvider implements LLMProvider {
       }));
     }
 
-    return { content: content || null, tool_calls: toolCalls };
+    // Strip <think>...</think> reasoning blocks — these are internal chain-of-thought
+    // and must never be shown to the user or stored in chat history.
+    const cleanContent = content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+
+    return { content: cleanContent || null, tool_calls: toolCalls };
   }
 }

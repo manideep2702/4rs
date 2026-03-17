@@ -107,30 +107,23 @@ export function buildChatSystemPrompt(agentIndex: number): string {
     '',
     'CONTEXT:',
     isAM
-      ? [
-          'You are the Orchestrator. The client is here to discuss a project, refine their brief, or review final delivery.',
-          '',
-          'CRITICAL OUTPUT RULE: You MUST ALWAYS produce a visible text response. You must NEVER return an empty message or silently ignore the client\'s input. This is a hard rule — violation of it breaks the entire workflow.',
-          '',
-          'IMPORTANT BRIEFING RULE: Do NOT start work (propose tasks) until you have a clear, specific, and actionable brief from the client.',
-          'If the client message is missing details, ask clarifying questions instead of starting the project.',
-          'Use the "update_client_brief" tool to save/update the official brief based on the client\'s input.',
-          'Once the brief is final and you are ready to start, use "propose_task" to assign work to the team.',
-          'After calling propose_task for all agents, confirm to the client that work has started and what each agent is doing.'
-        ].join(' ')
+      ? 'You are the Orchestrator/Account Manager. The client is here to kick off or update a project.'
       : 'The client has approached you for a conversation. If you previously requested their approval/feedback on a task (ON_HOLD), they are here to provide it so you can resume work.',
-    'Be helpful, friendly, and stay in character.',
+    'Be helpful, professional, and stay in character.',
     '',
     'RULES:',
-    '- ALWAYS produce a non-empty text response to every client message — no exceptions.',
-    '- Be conversational and responsive. Answer the client\'s questions directly.',
-    '- IF the brief is unclear, ask ONE focused clarifying question in your response.',
-    '- IF the brief is clear, call `update_client_brief` then immediately call `propose_task` for each team member.',
-    '- IF the client provides the feedback or approval you needed to CONTINUE (the task stays in progress): call "receive_client_approval". The chat session will terminate and you will return to your workstation.',
-    '- IF the client provides the final sign-off or enough info that your work is actually DONE: call "complete_task" with the assembled web app output. The chat session will also terminate.',
-    '- Keep replies concise (2-4 sentences) unless the client asks for detail.',
-    '- Use "update_client_brief" if you are the Orchestrator and the project requirements have changed.',
-    '- Do NOT propose new tasks or execute work via tools here (unless you are the Orchestrator starting the project).',
+    '- ALWAYS produce a non-empty text response — no exceptions.',
+    ...(isAM ? [
+      '- DECISION RULE: If the client has provided ANYTHING to work with (a project idea, preferences, a feature list, or answered a previous question) → you MUST call update_client_brief THEN propose_task for every team member. Do NOT ask another question.',
+      '- You are allowed ONE clarifying question per conversation, only if the client\'s very first message is completely blank or totally ambiguous (e.g. just "hi").',
+      '- Once you have a project idea + any preferences (style, platform, features, etc.), that is enough — start the project immediately.',
+      '- After calling propose_task for all agents, tell the client work has started and what each agent will do.',
+      '- Use update_client_brief to save the brief before proposing tasks.',
+    ] : [
+      '- IF the client provides the feedback or approval you needed: call "receive_client_approval".',
+      '- IF your work is fully done based on client input: call "complete_task" with your output.',
+    ]),
+    '- Keep replies concise (2-4 sentences).',
   ]
     .join('\n')
     .trim()
