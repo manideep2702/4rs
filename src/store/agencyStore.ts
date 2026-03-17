@@ -68,6 +68,7 @@ interface AgencyState {
   isLogOpen: boolean
   isFinalOutputOpen: boolean;
   pendingApprovalTaskId: string | null;
+  pendingUpdateRequest: string | null;
   logFilterAgentIndex: number | null;
   isResizing: boolean;
   isPaused: boolean;
@@ -99,6 +100,7 @@ interface AgencyState {
   setLogOpen: (open: boolean, filterAgent?: number | null) => void;
   setFinalOutputOpen: (open: boolean) => void;
   setPendingApproval: (taskId: string | null) => void;
+  requestProjectUpdate: (feedback: string) => void;
   setIsResizing: (isResizing: boolean) => void;
   togglePause: () => void;
   setPaused: (paused: boolean) => void;
@@ -126,6 +128,7 @@ export const useAgencyStore = create<AgencyState>()(
       isLogOpen: true,
       isFinalOutputOpen: false,
       pendingApprovalTaskId: null,
+      pendingUpdateRequest: null,
       logFilterAgentIndex: null,
       isResizing: false,
       isPaused: false,
@@ -142,6 +145,7 @@ export const useAgencyStore = create<AgencyState>()(
         agentSummaries: {},
         boardroomHistories: {},
         pendingApprovalTaskId: null,
+        pendingUpdateRequest: null,
         isFinalOutputOpen: false,
         isPaused: false,
       }),
@@ -266,6 +270,13 @@ export const useAgencyStore = create<AgencyState>()(
         set({ isLogOpen: open, logFilterAgentIndex: filterAgent ?? null }),
       setFinalOutputOpen: (open) => set({ isFinalOutputOpen: open }),
       setPendingApproval: (taskId) => set({ pendingApprovalTaskId: taskId }),
+      requestProjectUpdate: (feedback) => set({
+        pendingUpdateRequest: feedback,
+        finalOutput: null,
+        phase: 'working',
+        isFinalOutputOpen: false,
+        tasks: [],
+      }),
       setIsResizing: (resizing) => set({ isResizing: resizing }),
       togglePause: () => set((s) => ({ isPaused: !s.isPaused })),
       setPaused: (isPaused) => set({ isPaused }),

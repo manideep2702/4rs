@@ -58,11 +58,28 @@ export class SceneManager {
     await this.engine.init();
     if (this.isDisposed) return;
 
-    // 1. Load World & Office Assets
-    await this.worldManager.load();
+    // Start the render loop immediately so the background renders even during loading
+    this.engine.renderer.setAnimationLoop(this.animate.bind(this));
 
-    // 2. Load Characters
-    await this.characterManager.load();
+    try {
+      // 1. Load World & Office Assets
+      await this.worldManager.load();
+
+      // 2. Load Characters
+      await this.characterManager.load();
+    } catch (err) {
+      console.error('[SceneManager] Asset loading failed, retrying in 3s:', err);
+      // Retry once after a short delay (handles transient network issues)
+      await new Promise(r => setTimeout(r, 3000));
+      if (this.isDisposed) return;
+      try {
+        await this.worldManager.load();
+        await this.characterManager.load();
+      } catch (retryErr) {
+        console.error('[SceneManager] Asset loading failed on retry:', retryErr);
+        return;
+      }
+    }
     if (this.isDisposed) return;
 
     const state = useStore.getState();
@@ -110,8 +127,6 @@ export class SceneManager {
       (point) => this.navMesh.isPointOnNavMesh(point),
       () => useAgencyStore.getState().isPaused,
     );
-
-    this.engine.renderer.setAnimationLoop(this.animate.bind(this));
 
     // React to store changes that affect the 3D world
     const unsub = useStore.subscribe((s, prev) => {

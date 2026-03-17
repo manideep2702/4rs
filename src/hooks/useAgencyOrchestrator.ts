@@ -351,6 +351,37 @@ export function useAgencyOrchestrator() {
 
     // Watch for new scheduled tasks and dispatch them
     const unsub = useAgencyStore.subscribe((s, prev) => {
+      // ── Handle client update requests (post-delivery revisions) ──
+      if (s.pendingUpdateRequest && !prev.pendingUpdateRequest) {
+        const feedback = s.pendingUpdateRequest;
+        useAgencyStore.getState().addLogEntry({
+          agentIndex: 0,
+          action: `client requested revisions: "${feedback.slice(0, 60)}${feedback.length > 60 ? '…' : ''}"`,
+        });
+        // Clear the pending request then re-engage orchestrator
+        useAgencyStore.setState({ pendingUpdateRequest: null });
+        if (!runningAgents.current.has(ORCHESTRATOR_INDEX)) {
+          runningAgents.current.add(ORCHESTRATOR_INDEX);
+          callOrchestrator(
+            `The client has reviewed the delivered output and is requesting revisions. ` +
+            `Client feedback: "${feedback}". ` +
+            `Please analyze the feedback, create new revision tasks for the team using propose_task, and coordinate the update.`
+          ).then((response) => {
+            if (response.functionCalls) {
+              for (const fn of response.functionCalls) {
+                processFunctionCall(fn, ORCHESTRATOR_INDEX);
+              }
+            }
+          }).catch((err) => {
+            if ((err as DOMException)?.name !== 'AbortError') {
+              console.error('[Orchestrator] revision request error:', err);
+            }
+          }).finally(() => {
+            runningAgents.current.delete(ORCHESTRATOR_INDEX);
+          });
+        }
+      }
+
       // Check if tasks changed status or were removed, making project ready
       const tasksChanged = s.tasks.some((t, i) => t.status !== prev.tasks[i]?.status) ||
                            s.tasks.length !== prev.tasks.length;
