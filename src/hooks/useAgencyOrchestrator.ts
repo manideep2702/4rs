@@ -273,10 +273,13 @@ export function useAgencyOrchestrator() {
             `Call request_client_approval if you still need more input, otherwise proceed with your management tools (propose_task, update_client_brief, etc.).`
           )
         } else {
-          // Use chatMode so the orchestrator uses the briefing-aware chat prompt.
-          // This prevents infinite clarification loops and ensures propose_task is called
-          // once enough info is gathered.
-          response = await callAgent({ agentIndex: ORCHESTRATOR_INDEX, userMessage: text, chatMode: true })
+          // Build an enriched message that forces the model to act when requirements are present
+          const workerAgents = getActiveAgentSet().agents.filter(a => !a.isPlayer && a.index !== ORCHESTRATOR_INDEX)
+          const agentIds = workerAgents.map(a => `[ID:${a.index}] ${a.role}`).join(', ')
+          const enriched = store.phase === 'briefing' || store.clientBrief
+            ? `Client message: "${text}"\n\nAvailable worker agents for propose_task: ${agentIds}\n\nIf this message contains ANY project requirements, immediately call update_client_brief then propose_task for each worker agent listed above. Do not ask another question.`
+            : text
+          response = await callAgent({ agentIndex: ORCHESTRATOR_INDEX, userMessage: enriched, chatMode: true })
         }
 
         if (response.functionCalls) {

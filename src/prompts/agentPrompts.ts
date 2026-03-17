@@ -91,7 +91,7 @@ export function buildTaskBoardSummary(tasks: Task[]): string {
     .join('\n')
 }
 
-// ─── Conversational chat prompt (no tools, no workflow) ───────
+// ─── Conversational chat prompt (orchestrator briefing / worker approval) ─────
 export function buildChatSystemPrompt(agentIndex: number): string {
   const { agents, companyName } = getActiveAgentSet()
   const agent = agents.find(a => a.index === agentIndex)
@@ -99,31 +99,40 @@ export function buildChatSystemPrompt(agentIndex: number): string {
 
   const isAM = agentIndex === 1;
 
+  const teamList = agents
+    .filter((a) => !a.isPlayer)
+    .map((a) => `  [ID: ${a.index}] ${a.role} (${a.department}) — ${a.mission}`)
+    .join('\n')
+
+  const workerAgents = agents.filter((a) => !a.isPlayer && a.index !== 1)
+
   return [
     `You are ${agent.role} at ${companyName}.`,
     `Department: ${agent.department}`,
     `Mission: ${agent.mission}`,
     `Personality: ${agent.personality}`,
     '',
+    SCOPE_CONSTRAINT,
+    '',
+    `TEAM (use these IDs in propose_task):\n${teamList}`,
+    '',
     'CONTEXT:',
     isAM
-      ? 'You are the Orchestrator/Account Manager. The client is here to kick off or update a project.'
-      : 'The client has approached you for a conversation. If you previously requested their approval/feedback on a task (ON_HOLD), they are here to provide it so you can resume work.',
-    'Be helpful, professional, and stay in character.',
+      ? 'You are the Orchestrator/Account Manager. The client is briefing you to start a project.'
+      : 'The client has approached you. If you have an ON_HOLD task, they are providing feedback so you can resume.',
     '',
     'RULES:',
     '- ALWAYS produce a non-empty text response — no exceptions.',
     ...(isAM ? [
-      '- DECISION RULE: If the client has provided ANYTHING to work with (a project idea, preferences, a feature list, or answered a previous question) → you MUST call update_client_brief THEN propose_task for every team member. Do NOT ask another question.',
-      '- You are allowed ONE clarifying question per conversation, only if the client\'s very first message is completely blank or totally ambiguous (e.g. just "hi").',
-      '- Once you have a project idea + any preferences (style, platform, features, etc.), that is enough — start the project immediately.',
-      '- After calling propose_task for all agents, tell the client work has started and what each agent will do.',
-      '- Use update_client_brief to save the brief before proposing tasks.',
+      `- WORKER AGENTS you can assign tasks to: ${workerAgents.map(a => `[ID:${a.index}] ${a.role}`).join(', ')}`,
+      '- DECISION RULE: The moment the client gives you ANYTHING actionable (a project name, idea, feature, or answers a question) you MUST: (1) call update_client_brief with a full brief, (2) call propose_task once for EACH worker agent with a specific task description. NO MORE QUESTIONS after that.',
+      '- Only ask ONE clarifying question if the very first message is "hi" or completely empty — never more than one.',
+      '- After calling propose_task for all workers, confirm work has started in your text reply.',
     ] : [
-      '- IF the client provides the feedback or approval you needed: call "receive_client_approval".',
-      '- IF your work is fully done based on client input: call "complete_task" with your output.',
+      '- IF the client provided the feedback you needed to continue: call receive_client_approval.',
+      '- IF your task is now fully done based on client input: call complete_task with your full output.',
     ]),
-    '- Keep replies concise (2-4 sentences).',
+    '- Keep replies under 3 sentences.',
   ]
     .join('\n')
     .trim()
