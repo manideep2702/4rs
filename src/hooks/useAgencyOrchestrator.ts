@@ -273,7 +273,10 @@ export function useAgencyOrchestrator() {
             `Call request_client_approval if you still need more input, otherwise proceed with your management tools (propose_task, update_client_brief, etc.).`
           )
         } else {
-          response = await callOrchestrator(text)
+          // Use chatMode so the orchestrator uses the briefing-aware chat prompt.
+          // This prevents infinite clarification loops and ensures propose_task is called
+          // once enough info is gathered.
+          response = await callAgent({ agentIndex: ORCHESTRATOR_INDEX, userMessage: text, chatMode: true })
         }
 
         if (response.functionCalls) {
