@@ -14,7 +14,8 @@ import { getActiveAgentSet } from '../store/agencyStore'
 
 // ── Constants ─────────────────────────────────────────────────
 const ORCHESTRATOR_INDEX = 1 // Orchestrator
-const TASK_TIMEOUT_MS = 10 * 60 * 1000 // 10 minutes
+// Nvidia thinking models (Nemotron 120B) can take 3+ minutes per call × 3 retries
+const TASK_TIMEOUT_MS = 20 * 60 * 1000 // 20 minutes
 
 const randomBetween = (min: number, max: number) =>
   Math.random() * (max - min) + min

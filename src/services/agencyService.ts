@@ -44,8 +44,11 @@ function abortRace(signal: AbortSignal): Promise<never> {
   });
 }
 
-/** Per-call timeout — rejects if a single LLM API call takes longer than this. */
-const CALL_TIMEOUT_MS = 45_000; // 45 seconds per individual call
+/** Per-call timeout — provider-aware. Large thinking models need more time. */
+function getCallTimeoutMs(provider: string): number {
+  if (provider === 'nvidia') return 180_000; // 3 min — Nemotron 120B thinking model
+  return 60_000; // 60s for all other providers
+}
 function callTimeout(ms: number): Promise<never> {
   return new Promise((_, reject) =>
     setTimeout(() => reject(new DOMException('LLM call timed out', 'TimeoutError')), ms)
@@ -190,6 +193,7 @@ export async function callAgent(params: {
   const authState = useAuthStore.getState()
   const isPlatformMode = authState?.tier === 'pro' && !llmConfig.apiKey
 
+  const CALL_TIMEOUT_MS = getCallTimeoutMs(llmConfig.provider);
   const MAX_RETRIES = 3;
   let response;
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
@@ -250,10 +254,10 @@ export async function callAgent(params: {
         (e as Error)?.message?.toLowerCase()?.includes('timeout');
 
       if (attempt < MAX_RETRIES - 1 && (isRateLimit || isTimeout)) {
-        const backoff = isTimeout ? 2000 : (attempt + 1) * 3000 + Math.random() * 2000;
+        const backoff = isTimeout ? 3000 : (attempt + 1) * 3000 + Math.random() * 2000;
         useAgencyStore.getState().addLogEntry({
           agentIndex,
-          action: `⟳ watchdog: ${isTimeout ? `no response in ${CALL_TIMEOUT_MS / 1000}s` : 'rate limited'} — retrying immediately (attempt ${attempt + 2}/${MAX_RETRIES})`,
+          action: `⟳ watchdog: ${isTimeout ? `no response in ${CALL_TIMEOUT_MS / 1000}s` : 'rate limited'} — retrying (attempt ${attempt + 2}/${MAX_RETRIES})`,
         });
         await new Promise((r) => setTimeout(r, backoff));
         continue;
