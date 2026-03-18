@@ -4,14 +4,18 @@ import type { Task } from '../store/agencyStore'
 // ─── Scope constraint (fixed for all agents) ──────────────────
 const SCOPE_CONSTRAINT = `
 SCOPE:
-Your output MUST be actual working code — HTML, CSS, or JavaScript relevant to your role.
-NEVER output JSON, design specs, bullet points, or documentation — only executable code.
-Your code will be combined with other agents' code by the Orchestrator into one complete web app.
-Examples of acceptable output:
-  - Designer: a <style> block with CSS rules, or an HTML component with inline styles
-  - Developer: a <script> block with JavaScript logic, or functional HTML with event handlers
-  - Copywriter: HTML markup containing the actual text content (headings, paragraphs, labels)
-Keep your code self-contained and focused on your area. Use comments to mark your section.
+You are building a SOFTWARE PRODUCT. Your task output MUST be actual working HTML/CSS/JavaScript code.
+NEVER output JSON, business plans, marketing strategies, bullet point lists, or documentation — ONLY executable code.
+The Orchestrator will combine all agent outputs into ONE professional web application.
+
+Role-specific code expectations:
+  - Designer/UI: Complete <style> block with modern CSS (variables, animations, hover effects, gradients, responsive)
+  - Developer: Working <script> block with full JavaScript logic (state, event handlers, DOM manipulation, game loops)
+  - Marketing/Copywriter: HTML sections with real copy (<section>, <header>, hero text, feature cards, CTAs)
+  - Sales/Business: HTML pricing tables, feature comparison, or data visualization components with real numbers
+
+IMPORTANT: Your code section must be self-contained and functional. Write code as if it will run in a browser today.
+Use comments like /* === DESIGNER SECTION === */ to mark your contribution.
 `.trim()
 
 // ─── Workflow rules + response schema ─────────────────────────

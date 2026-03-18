@@ -92,9 +92,16 @@ export function useAgencyOrchestrator() {
 
       const prompt = hasTasks
         ? `All tasks are completed. Team outputs:\n\n${outputs}\n\n` +
-          `MANDATORY: You MUST call notify_client_project_ready RIGHT NOW with a complete, self-contained HTML document (<!DOCTYPE html>...) ` +
-          `that combines ALL the above outputs into one working interactive web app. ` +
-          `Do not explain, do not ask questions — just call the tool with the full HTML.`
+          `MANDATORY: Call notify_client_project_ready RIGHT NOW with a COMPLETE, PROFESSIONAL, FULLY FUNCTIONAL web application as a single self-contained HTML file.\n\n` +
+          `CRITICAL REQUIREMENTS — this must be a REAL SOFTWARE PRODUCT, not a presentation:\n` +
+          `- Navigation bar with working links/tabs\n` +
+          `- Fully interactive JavaScript (working buttons, forms, game logic, state management)\n` +
+          `- Modern CSS: gradients, shadows, hover effects, animations, responsive design\n` +
+          `- Professional color palette and typography — looks like a real deployed product\n` +
+          `- All features from the brief must WORK (e.g. a game must be playable, a booking form must validate input)\n` +
+          `- NO slide-style sections, NO bullet lists of specs, NO "coming soon" placeholders\n` +
+          `- Think Spotify, Airbnb, Linear — a polished product UI, not a Word document\n\n` +
+          `Integrate all team outputs into one cohesive app. Do not explain — just call the tool with the complete HTML now.`
         : `All tasks have been removed. Call notify_client_project_ready with a brief summary HTML page explaining the project was reset.`
 
       const MAX_DELIVERY_ATTEMPTS = 2
@@ -149,11 +156,22 @@ export function useAgencyOrchestrator() {
   <title>Project Deliverable</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, -apple-system, sans-serif; background: #f9fafb; color: #111827; line-height: 1.6; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f1f5f9; line-height: 1.6; min-height: 100vh; }
+    nav { background: rgba(255,255,255,0.05); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.08); padding: 1rem 2rem; display: flex; align-items: center; gap: 2rem; position: sticky; top: 0; z-index: 100; }
+    nav h1 { font-size: 1.2rem; font-weight: 800; background: linear-gradient(135deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    main { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    section { margin-bottom: 3rem; }
+    button, .btn { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    button:hover, .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99,102,241,0.4); }
+    input, textarea, select { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #f1f5f9; padding: 0.75rem 1rem; border-radius: 0.5rem; width: 100%; outline: none; }
+    input:focus, textarea:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
   </style>
 </head>
 <body>
+  <nav><h1>Built by Maxxyyy</h1></nav>
+  <main>
 ${mergedSections}
+  </main>
 </body>
 </html>`
           processFunctionCall({ name: 'notify_client_project_ready', args: { finalWebApp: fallbackHtml } }, ORCHESTRATOR_INDEX)
@@ -197,10 +215,11 @@ ${mergedSections}
       const response = await Promise.race([
         callAgent({
           agentIndex,
-          userMessage: `You have been assigned task [${task.id}]: "${task.description}". ` +
-            `Execute the task and call complete_task with WORKING CODE ONLY (HTML markup, CSS styles, or JavaScript — never JSON or design specs). ` +
-            `The Orchestrator assembles all code modules into the final web app. ` +
-            `Only call request_client_approval if you genuinely cannot proceed without client input.`,
+          userMessage: `You have been assigned task [${task.id}]: "${task.description}".\n\n` +
+            `MANDATORY: Write actual HTML/CSS/JavaScript code for your section of the web application. ` +
+            `Do NOT write a business plan, strategy doc, or bullet list — write CODE that runs in a browser.\n` +
+            `Examples: a styled HTML section, a working JavaScript component, a CSS animation block.\n` +
+            `Call complete_task with your code. Only call request_client_approval if absolutely necessary.`,
         }),
         timeout,
       ])
@@ -380,6 +399,9 @@ ${mergedSections}
               `MANDATORY (execute in this SINGLE response, no exceptions):\n` +
               `1. Call update_client_brief with the complete project requirements.\n` +
               `2. Call propose_task ONCE for EACH worker agent listed above.\n` +
+              `CRITICAL — each task description MUST be a specific CODE section of the final web app, NOT a business analysis or strategy document.\n` +
+              `Examples of GOOD task descriptions: "Build the HTML layout and navigation structure", "Write the CSS styling, animations and responsive design", "Implement the JavaScript game logic and interactivity", "Create the hero section, features section and footer HTML content".\n` +
+              `Examples of BAD task descriptions: "Validate Business Viability", "Develop Marketing Strategy", "Assess Brand Identity" — these produce non-code output.\n` +
               `Do NOT send only one tool call. Do NOT ask questions. Both steps are required now.`
             : text
 
