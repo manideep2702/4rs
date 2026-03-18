@@ -1,4 +1,4 @@
-# The Delegation
+# The Maxxyyy
 
 ![The Delegation Hero](public/images/the-delegation-UI.png)
 
