@@ -160,8 +160,9 @@ export function useAgencyOrchestrator() {
         callAgent({
           agentIndex,
           userMessage: `You have been assigned task [${task.id}]: "${task.description}". ` +
-            `Execute the task now and call complete_task with your full output. ` +
-            `Only call request_client_approval if you genuinely cannot proceed without client input — avoid blocking if possible.`,
+            `Execute the task now and call complete_task with your module output (your specific component or content — NOT a full HTML page). ` +
+            `The Orchestrator will combine all modules into the final deliverable. ` +
+            `Only call request_client_approval if you genuinely cannot proceed without client input.`,
         }),
         timeout,
       ])
@@ -260,19 +261,36 @@ export function useAgencyOrchestrator() {
 
   // ── Dispatch a scheduled task ─────────────────────────────────
   const dispatchTask = (task: Task) => {
-    const isBoardroom = task.assignedAgentIds.length > 1
+    // Filter out the orchestrator — it coordinates, it doesn't execute worker tasks
+    const workerIds = task.assignedAgentIds.filter((i) => i !== ORCHESTRATOR_INDEX)
+
+    if (workerIds.length === 0) {
+      // Task was assigned only to the orchestrator — skip it and mark done so checkAllTasksDone can fire
+      useAgencyStore.getState().updateTaskStatus(task.id, 'done')
+      useAgencyStore.getState().addLogEntry({
+        agentIndex: ORCHESTRATOR_INDEX,
+        action: `skipped self-assigned task — orchestrator delegates, not executes`,
+        taskId: task.id,
+      })
+      setTimeout(() => checkAllTasksDone(), 100)
+      return
+    }
+
+    const isBoardroom = workerIds.length > 1
+    // Work with worker-only ids for dispatch
+    const effectiveTask = { ...task, assignedAgentIds: workerIds }
 
     if (isBoardroom) {
       // All agents must be free
-      const anyBusy = task.assignedAgentIds.some((i) => runningAgents.current.has(i))
+      const anyBusy = workerIds.some((i) => runningAgents.current.has(i))
       if (anyBusy) return
-      task.assignedAgentIds.forEach((i) => runningAgents.current.add(i))
-      runBoardroomTask(task)
+      workerIds.forEach((i) => runningAgents.current.add(i))
+      runBoardroomTask(effectiveTask)
     } else {
-      const agentIndex = task.assignedAgentIds[0]
+      const agentIndex = workerIds[0]
       if (runningAgents.current.has(agentIndex)) return
       runningAgents.current.add(agentIndex)
-      runSingleAgentTask(task, agentIndex)
+      runSingleAgentTask(effectiveTask, agentIndex)
     }
   }
 

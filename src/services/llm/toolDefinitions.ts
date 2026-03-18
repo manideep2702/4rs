@@ -74,7 +74,7 @@ export const AGENCY_TOOLS: LLMToolDefinition[] = [
     type: 'function',
     function: {
       name: 'complete_task',
-      description: 'When your work is done. output is your code or content contribution to the final web app.',
+      description: 'When your work is done. output is YOUR MODULE ONLY — a specific component, snippet, or content piece. Do NOT wrap in a full HTML document. The Orchestrator will assemble all modules into the final app.',
       parameters: {
         type: 'object',
         properties: {
@@ -84,7 +84,7 @@ export const AGENCY_TOOLS: LLMToolDefinition[] = [
           },
           output: {
             type: 'string',
-            description: 'Your code or content contribution (HTML/CSS/JS or copy text) for the final web app.',
+            description: 'Your specific module output: JS logic, CSS styles, HTML component, copy text, or structured content — NOT a full standalone HTML page.',
           },
         },
         required: ['taskId', 'output'],

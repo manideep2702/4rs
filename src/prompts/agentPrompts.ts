@@ -4,9 +4,10 @@ import type { Task } from '../store/agencyStore'
 // ─── Scope constraint (fixed for all agents) ──────────────────
 const SCOPE_CONSTRAINT = `
 SCOPE:
-Your deliverable is WORKING CODE or CONTENT that will be assembled into a complete web app.
-You DO produce real code, real UI components, real copy, and real logic.
-The final output opened by the client must be a live, interactive web app — NOT a text prompt.
+Your job is to produce YOUR SPECIFIC MODULE or CONTENT PIECE — not a full application.
+You produce real code snippets, UI components, copy, logic, or structured content relevant to your role.
+The Orchestrator will assemble ALL team outputs into the final deliverable — do NOT wrap your output in a full HTML document.
+Output only what is in your area of expertise. Be thorough and complete within your module.
 `.trim()
 
 // ─── Workflow rules + response schema ─────────────────────────
