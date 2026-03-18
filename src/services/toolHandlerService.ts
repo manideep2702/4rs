@@ -151,6 +151,11 @@ export class ToolHandlerService {
 
       case 'notify_client_project_ready': {
         const { finalWebApp } = fn.args as { finalWebApp: string };
+        if (!finalWebApp?.trim()) {
+          // LLM returned empty output — fallback to direct assembly from task outputs
+          store.assembleFinalOutputFromTasks();
+          break;
+        }
         store.setFinalOutput(finalWebApp);
         store.setPhase('done');
         store.setFinalOutputOpen(true);

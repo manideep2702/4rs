@@ -99,6 +99,7 @@ interface AgencyState {
   setKanbanOpen: (open: boolean) => void;
   setLogOpen: (open: boolean, filterAgent?: number | null) => void;
   setFinalOutputOpen: (open: boolean) => void;
+  assembleFinalOutputFromTasks: () => void;
   setPendingApproval: (taskId: string | null) => void;
   requestProjectUpdate: (feedback: string) => void;
   setIsResizing: (isResizing: boolean) => void;
@@ -269,6 +270,20 @@ export const useAgencyStore = create<AgencyState>()(
       setLogOpen: (open, filterAgent = null) =>
         set({ isLogOpen: open, logFilterAgentIndex: filterAgent ?? null }),
       setFinalOutputOpen: (open) => set({ isFinalOutputOpen: open }),
+
+      // Directly assemble final output from task outputs (fallback when LLM delivery fails)
+      assembleFinalOutputFromTasks: () => set((s) => {
+        if (s.finalOutput?.trim()) return {} // already have output, do nothing
+        const tasksWithOutput = s.tasks.filter(t => t.output?.trim())
+        if (tasksWithOutput.length === 0) return {}
+        const mergedSections = tasksWithOutput.map(t => {
+          const out = t.output!
+          const bodyMatch = out.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
+          return bodyMatch ? bodyMatch[1].trim() : out
+        }).join('\n\n')
+        const html = `<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>Project Deliverable</title>\n  <style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: system-ui, -apple-system, sans-serif; background: #f9fafb; color: #111827; line-height: 1.6; }</style>\n</head>\n<body>\n${mergedSections}\n</body>\n</html>`
+        return { finalOutput: html, isFinalOutputOpen: true, phase: 'done' }
+      }),
       setPendingApproval: (taskId) => set({ pendingApprovalTaskId: taskId }),
       requestProjectUpdate: (feedback) => set({
         pendingUpdateRequest: feedback,

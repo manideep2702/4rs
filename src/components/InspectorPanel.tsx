@@ -18,7 +18,7 @@ interface InspectorPanelProps {
 const InspectorPanel: React.FC<InspectorPanelProps> = ({ isFloating }) => {
   const { selectedNpcIndex, isChatting } = useStore();
   const scene = useSceneManager();
-  const { phase, setFinalOutputOpen, tasks, selectedAgentSetId } = useAgencyStore();
+  const { phase, setFinalOutputOpen, assembleFinalOutputFromTasks, finalOutput, tasks, selectedAgentSetId } = useAgencyStore();
   const agents = getAgentSet(selectedAgentSetId).agents;
   const { canChat, reason } = useChatAvailability(selectedNpcIndex);
   const prevCanChat = useRef(canChat);
@@ -136,7 +136,14 @@ const InspectorPanel: React.FC<InspectorPanelProps> = ({ isFloating }) => {
                         <span className="text-[10px] font-black uppercase tracking-widest text-yellow-700">Project Ready</span>
                       </div>
                       <button
-                        onClick={() => setFinalOutputOpen(true)}
+                        onClick={() => {
+                          if (finalOutput?.trim()) {
+                            setFinalOutputOpen(true)
+                          } else {
+                            // Output missing — build directly from task outputs
+                            assembleFinalOutputFromTasks()
+                          }
+                        }}
                         className="flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-300 active:scale-95 text-black px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all w-full shadow-sm"
                       >
                         <FolderOpen size={14} strokeWidth={3} />

@@ -9,7 +9,20 @@ export function FinalOutputModal() {
   const [showUpdateInput, setShowUpdateInput] = useState(false)
   const [updateFeedback, setUpdateFeedback] = useState('')
 
-  if (!isFinalOutputOpen || !finalOutput) return null
+  if (!isFinalOutputOpen) return null
+  // finalOutput may be null/empty if LLM returned empty — show error rather than nothing
+  if (finalOutput === null || finalOutput.trim() === '') {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }} onClick={() => setFinalOutputOpen(false)}>
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl p-10 flex flex-col items-center gap-4 shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="text-4xl">⚠️</div>
+          <h2 className="text-sm font-black text-zinc-800 dark:text-zinc-100 uppercase tracking-widest">Output Not Ready</h2>
+          <p className="text-[12px] text-zinc-400 text-center max-w-xs">The final output is still being assembled. Check the Activity log and try again in a moment.</p>
+          <button onClick={() => setFinalOutputOpen(false)} className="px-6 py-2 bg-zinc-900 text-white rounded-xl text-[11px] font-bold uppercase tracking-wider">Close</button>
+        </div>
+      </div>
+    )
+  }
 
   const agentCount = tasks.filter(t => t.output).length
 
