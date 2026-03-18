@@ -1,4 +1,4 @@
-# The Delegation — Project Documentation
+# The Maxxyyy — Project Documentation
 
 ## Overview
 
