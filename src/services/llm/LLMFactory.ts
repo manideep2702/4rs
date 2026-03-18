@@ -5,6 +5,7 @@ import { LLMProvider, LLMConfig } from './types';
 
 const QWEN_BASE_URL = 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1';
 const OPENAI_BASE_URL = 'https://api.openai.com/v1';
+const ANTHROPIC_BASE_URL = 'https://api.anthropic.com/v1';
 
 export class LLMFactory {
   static getProvider(config: LLMConfig): LLMProvider {
@@ -15,6 +16,8 @@ export class LLMFactory {
         return new OpenAICompatibleProvider(config.apiKey || '', config.baseUrl || QWEN_BASE_URL);
       case 'openai':
         return new OpenAICompatibleProvider(config.apiKey || '', config.baseUrl || OPENAI_BASE_URL);
+      case 'anthropic':
+        return new OpenAICompatibleProvider(config.apiKey || '', config.baseUrl || ANTHROPIC_BASE_URL);
       case 'local':
         return new OpenAICompatibleProvider(config.apiKey || '', config.baseUrl || 'http://localhost:11434/v1');
       case 'nvidia':

@@ -289,7 +289,18 @@ export function useAgencyOrchestrator() {
         }
         return response.text || null
       } catch (err) {
-        if ((err as DOMException)?.name !== 'AbortError') console.error('[Orchestrator] Orchestrator message error:', err)
+        if ((err as DOMException)?.name !== 'AbortError') {
+          console.error('[Orchestrator] Orchestrator message error:', err)
+          useAgencyStore.setState((s) => ({
+            agentHistories: {
+              ...s.agentHistories,
+              [ORCHESTRATOR_INDEX]: [
+                ...(s.agentHistories[ORCHESTRATOR_INDEX] || []),
+                { role: 'assistant', content: 'Something went wrong reaching the AI. Please check your API key in settings and try again.' },
+              ],
+            },
+          }))
+        }
         return null
       } finally {
         runningAgents.current.delete(ORCHESTRATOR_INDEX)
@@ -332,7 +343,18 @@ export function useAgencyOrchestrator() {
         }
         return response.text || null
       } catch (err) {
-        if ((err as DOMException)?.name !== 'AbortError') console.error('[Orchestrator] approval resume error:', err)
+        if ((err as DOMException)?.name !== 'AbortError') {
+          console.error('[Orchestrator] approval resume error:', err)
+          useAgencyStore.setState((s) => ({
+            agentHistories: {
+              ...s.agentHistories,
+              [npcIndex]: [
+                ...(s.agentHistories[npcIndex] || []),
+                { role: 'assistant', content: 'Something went wrong reaching the AI. Please check your API key in settings and try again.' },
+              ],
+            },
+          }))
+        }
         return null
       } finally {
         runningAgents.current.delete(npcIndex)
@@ -344,7 +366,18 @@ export function useAgencyOrchestrator() {
       const response = await callAgent({ agentIndex: npcIndex, userMessage: text, chatMode: true })
       return response.text || null
     } catch (err) {
-      if ((err as DOMException)?.name !== 'AbortError') console.error('[Orchestrator] NPC chat error:', err)
+      if ((err as DOMException)?.name !== 'AbortError') {
+        console.error('[Orchestrator] NPC chat error:', err)
+        useAgencyStore.setState((s) => ({
+          agentHistories: {
+            ...s.agentHistories,
+            [npcIndex]: [
+              ...(s.agentHistories[npcIndex] || []),
+              { role: 'assistant', content: 'Something went wrong reaching the AI. Please check your API key in settings and try again.' },
+            ],
+          },
+        }))
+      }
       return null
     }
   }

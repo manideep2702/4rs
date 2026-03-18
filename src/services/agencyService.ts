@@ -212,8 +212,19 @@ export async function callAgent(params: {
         action: `API error: ${errMsg.slice(0, 120)}`,
       });
 
+      const isAuthError = (e as any)?.status === 401 || (e as any)?.status === 403 ||
+        errMsg.includes('401') || errMsg.includes('403') ||
+        errMsg.toLowerCase().includes('api key') ||
+        errMsg.toLowerCase().includes('unauthorized') ||
+        errMsg.toLowerCase().includes('authentication') ||
+        errMsg.toLowerCase().includes('invalid key') ||
+        errMsg.toLowerCase().includes('permission denied');
+
       if (!llmConfig.apiKey) {
-        useStore.getState().setBYOKError('No API key configured. Please add your Gemini API key.');
+        useStore.getState().setBYOKError('No API key configured. Please add your API key.');
+        useStore.getState().setBYOKOpen(true);
+      } else if (isAuthError) {
+        useStore.getState().setBYOKError(`Authentication failed: ${errMsg.slice(0, 150)}. Please check your API key.`);
         useStore.getState().setBYOKOpen(true);
       }
       throw e;
