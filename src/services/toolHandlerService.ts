@@ -2,6 +2,38 @@ import { useAgencyStore } from '../store/agencyStore';
 import { AgentFunctionCall } from './agencyService';
 import { getActiveAgentSet } from '../store/agencyStore';
 
+/**
+ * Sanitize an HTML document the LLM produced.
+ * Moves any <style> blocks that ended up in <body> back into <head>.
+ */
+function sanitizeHtmlOutput(html: string): string {
+  if (!/<html[\s>]/i.test(html)) return html;
+
+  // Split at <body> tag — everything before is head region, after is body
+  const bodyTagMatch = html.match(/(<body[^>]*>)/i);
+  if (!bodyTagMatch) return html;
+  const bodyTagIdx = html.indexOf(bodyTagMatch[0]);
+  const headRegion = html.slice(0, bodyTagIdx + bodyTagMatch[0].length);
+  let bodyRegion = html.slice(bodyTagIdx + bodyTagMatch[0].length);
+
+  // Extract <style> blocks from body region
+  const extractedStyles: string[] = [];
+  bodyRegion = bodyRegion.replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, (full) => {
+    extractedStyles.push(full);
+    return '';
+  });
+
+  if (extractedStyles.length === 0) return html;
+
+  // Inject extracted styles before </head>
+  const fixed = html.slice(0, bodyTagIdx)
+    .replace('</head>', extractedStyles.join('\n') + '\n</head>')
+    + bodyTagMatch[0]
+    + bodyRegion;
+
+  return fixed;
+}
+
 export class ToolHandlerService {
   /**
    * Process a function call returned by an agent and update the store.
@@ -156,7 +188,10 @@ export class ToolHandlerService {
           store.assembleFinalOutputFromTasks();
           break;
         }
-        store.setFinalOutput(finalWebApp);
+        // Post-process: move any raw CSS/JS that leaked into <body> to the correct location.
+        // This happens when the LLM dumps agent outputs verbatim without re-wrapping them.
+        const fixedOutput = sanitizeHtmlOutput(finalWebApp);
+        store.setFinalOutput(fixedOutput);
         store.setPhase('done');
         store.setFinalOutputOpen(true);
         store.addLogEntry({

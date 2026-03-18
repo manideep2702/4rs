@@ -14,6 +14,88 @@ import { getActiveAgentSet } from '../store/agencyStore'
 
 // ── Constants ─────────────────────────────────────────────────
 const ORCHESTRATOR_INDEX = 1 // Orchestrator
+
+// ── Smart HTML assembler ───────────────────────────────────────
+// Workers often output raw CSS or JS without tags. This parser separates
+// styles/scripts/markup and assembles a properly structured HTML document.
+function assembleTaskOutputs(tasks: { output?: string | null; description: string }[]): string {
+  const styles: string[] = []
+  const scripts: string[] = []
+  const sections: string[] = []
+
+  for (const task of tasks.filter(t => t.output)) {
+    const raw = task.output!
+
+    // ── Full HTML document: deconstruct it ────────────────────
+    if (/<html[\s>]/i.test(raw)) {
+      for (const m of raw.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)) styles.push(m[1].trim())
+      for (const m of raw.matchAll(/<script(?:\s[^>]*)?>(?!.*src=)([\s\S]*?)<\/script>/gi)) {
+        const js = m[1].trim()
+        if (js) scripts.push(js)
+      }
+      const bodyM = raw.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
+      if (bodyM) {
+        const bodyContent = bodyM[1]
+          .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+          .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+          .trim()
+        if (bodyContent) sections.push(bodyContent)
+      }
+      continue
+    }
+
+    // ── Partial output: extract inline <style>/<script> tags first ──
+    for (const m of raw.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)) styles.push(m[1].trim())
+    for (const m of raw.matchAll(/<script(?:\s[^>]*)?>(?!.*src=)([\s\S]*?)<\/script>/gi)) {
+      const js = m[1].trim()
+      if (js) scripts.push(js)
+    }
+    const stripped = raw
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+      .trim()
+
+    if (!stripped) continue
+
+    // ── Detect raw CSS (no HTML tags, has CSS property: value patterns) ──
+    const hasCSSRules = /[\w-]+\s*:\s*[^{};,]+;/.test(stripped)
+    const hasHTMLTags = /<[a-z][a-z0-9]*[\s\/>]/i.test(stripped)
+    const hasJSKeywords = /\b(?:function|const|let|var|=>|document\.|window\.|addEventListener|class\s+\w)/i.test(stripped)
+
+    if (!hasHTMLTags && hasCSSRules && !hasJSKeywords) {
+      // Pure CSS block — wrap it
+      styles.push(stripped)
+    } else if (!hasHTMLTags && hasJSKeywords) {
+      // Pure JS block — wrap it
+      scripts.push(stripped)
+    } else {
+      // HTML content (or mixed) — goes in body
+      sections.push(stripped)
+    }
+  }
+
+  const stylesTag = styles.length > 0 ? `  <style>\n${styles.join('\n\n')}\n  </style>` : ''
+  const scriptTag = scripts.length > 0 ? `<script>\n${scripts.join('\n\n')}\n</script>` : ''
+  const bodyContent = sections.join('\n\n') || '<div style="padding:2rem;text-align:center;color:#94a3b8">No HTML content produced — check agent task outputs.</div>'
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Deliverable</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; min-height: 100vh; }
+  </style>
+${stylesTag}
+</head>
+<body>
+${bodyContent}
+${scriptTag}
+</body>
+</html>`
+}
 // Nvidia thinking models (Nemotron 120B) can take 3+ minutes per call × 3 retries
 const TASK_TIMEOUT_MS = 20 * 60 * 1000 // 20 minutes
 
@@ -140,40 +222,7 @@ export function useAgencyOrchestrator() {
             agentIndex: ORCHESTRATOR_INDEX,
             action: `using fallback assembly — combining ${store.tasks.filter(t => t.output).length} task outputs directly`,
           })
-          // Build a proper merged HTML: extract body content from each task output
-          const mergedSections = store.tasks.filter(t => t.output).map(t => {
-            const out = t.output!
-            // If it's a full HTML doc, extract the body content
-            const bodyMatch = out.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
-            return bodyMatch ? bodyMatch[1].trim() : out
-          }).join('\n\n')
-
-          const fallbackHtml = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Project Deliverable</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f1f5f9; line-height: 1.6; min-height: 100vh; }
-    nav { background: rgba(255,255,255,0.05); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.08); padding: 1rem 2rem; display: flex; align-items: center; gap: 2rem; position: sticky; top: 0; z-index: 100; }
-    nav h1 { font-size: 1.2rem; font-weight: 800; background: linear-gradient(135deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    main { max-width: 1200px; margin: 0 auto; padding: 2rem; }
-    section { margin-bottom: 3rem; }
-    button, .btn { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-    button:hover, .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99,102,241,0.4); }
-    input, textarea, select { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #f1f5f9; padding: 0.75rem 1rem; border-radius: 0.5rem; width: 100%; outline: none; }
-    input:focus, textarea:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
-  </style>
-</head>
-<body>
-  <nav><h1>Built by Maxxyyy</h1></nav>
-  <main>
-${mergedSections}
-  </main>
-</body>
-</html>`
+          const fallbackHtml = assembleTaskOutputs(store.tasks)
           processFunctionCall({ name: 'notify_client_project_ready', args: { finalWebApp: fallbackHtml } }, ORCHESTRATOR_INDEX)
         }
       }
@@ -182,12 +231,7 @@ ${mergedSections}
       // Last-resort fallback — even if something completely unexpected threw
       const storeNow = useAgencyStore.getState()
       if (!storeNow.finalOutput && storeNow.tasks.some(t => t.output)) {
-        const mergedSections = storeNow.tasks.filter(t => t.output).map(t => {
-          const out = t.output!
-          const bodyMatch = out.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
-          return bodyMatch ? bodyMatch[1].trim() : out
-        }).join('\n\n')
-        const emergencyHtml = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Project Output</title><style>body{font-family:system-ui,sans-serif;background:#f9fafb;padding:2rem}</style></head><body>${mergedSections}</body></html>`
+        const emergencyHtml = assembleTaskOutputs(storeNow.tasks)
         processFunctionCall({ name: 'notify_client_project_ready', args: { finalWebApp: emergencyHtml } }, ORCHESTRATOR_INDEX)
       }
     } finally {
