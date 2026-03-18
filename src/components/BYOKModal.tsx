@@ -10,12 +10,20 @@ interface BYOKModalProps {
 const STORAGE_KEY = 'byok-config';
 
 const PROVIDERS = [
-  { id: 'gemini', label: 'Gemini', model: 'gemini-2.5-flash', enabled: true },
-  { id: 'qwen', label: 'Qwen', model: 'qwen-turbo', enabled: true },
-  { id: 'nvidia', label: 'NVIDIA', model: 'minimaxai/minimax-m2.5', enabled: true },
-  { id: 'openai', label: 'OpenAI', model: 'gpt-4o', enabled: false },
-  { id: 'anthropic', label: 'Anthropic', model: 'claude-opus-4-5', enabled: false },
+  { id: 'gemini', label: 'Gemini', model: 'gemini-2.5-flash', enabled: true, customModel: false },
+  { id: 'qwen', label: 'Qwen', model: 'qwen-turbo', enabled: true, customModel: false },
+  { id: 'nvidia', label: 'NVIDIA', model: 'nvidia/nemotron-3-super-120b-a12b', enabled: true, customModel: true },
+  { id: 'openai', label: 'OpenAI', model: 'gpt-4o', enabled: false, customModel: false },
+  { id: 'anthropic', label: 'Anthropic', model: 'claude-opus-4-5', enabled: false, customModel: false },
 ] as const;
+
+const NVIDIA_MODEL_SUGGESTIONS = [
+  'nvidia/nemotron-3-super-120b-a12b',
+  'nvidia/llama-3.1-nemotron-70b-instruct',
+  'nvidia/llama-3.3-nemotron-super-49b-v1',
+  'meta/llama-3.1-405b-instruct',
+  'mistralai/mixtral-8x22b-instruct-v0.1',
+];
 
 const BYOKModal: React.FC<BYOKModalProps> = ({ onClose }) => {
   const { llmConfig, setLlmConfig, byokError } = useStore();
@@ -23,13 +31,22 @@ const BYOKModal: React.FC<BYOKModalProps> = ({ onClose }) => {
   const [selectedProvider, setSelectedProvider] = useState<string>(llmConfig.provider);
   const [apiKey, setApiKey] = useState<string>(llmConfig.apiKey || '');
   const [showKey, setShowKey] = useState(false);
+  const [nvidiaModel, setNvidiaModel] = useState<string>(
+    llmConfig.provider === 'nvidia' ? llmConfig.model : 'nvidia/nemotron-3-super-120b-a12b'
+  );
+  const [showModelSuggestions, setShowModelSuggestions] = useState(false);
+
+  const getModel = () => {
+    if (selectedProvider === 'nvidia') return nvidiaModel.trim() || 'nvidia/nemotron-3-super-120b-a12b';
+    return PROVIDERS.find(p => p.id === selectedProvider)?.model ?? '';
+  };
 
   const handleSave = () => {
     const provider = PROVIDERS.find(p => p.id === selectedProvider)!;
     const config = {
       provider: provider.id as 'gemini' | 'openai' | 'anthropic' | 'qwen' | 'local' | 'nvidia',
       apiKey,
-      model: provider.model,
+      model: getModel(),
     };
     setLlmConfig(config);
     try {
@@ -43,7 +60,7 @@ const BYOKModal: React.FC<BYOKModalProps> = ({ onClose }) => {
     const emptyConfig = {
       provider: provider.id as 'gemini' | 'openai' | 'anthropic' | 'qwen' | 'local' | 'nvidia',
       apiKey: '',
-      model: provider.model,
+      model: getModel(),
     };
     setApiKey('');
     setLlmConfig(emptyConfig);
@@ -112,7 +129,7 @@ const BYOKModal: React.FC<BYOKModalProps> = ({ onClose }) => {
                   <button
                     key={p.id}
                     disabled={!p.enabled}
-                    onClick={() => p.enabled && setSelectedProvider(p.id)}
+                    onClick={() => { if (p.enabled) { setSelectedProvider(p.id); setShowModelSuggestions(false); } }}
                     className={`px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border
                       ${selectedProvider === p.id && p.enabled
                         ? 'bg-zinc-900 text-white border-zinc-900'
@@ -196,6 +213,43 @@ const BYOKModal: React.FC<BYOKModalProps> = ({ onClose }) => {
                 </button>
               </div>
             </div>
+
+            {/* NVIDIA Model selector */}
+            {selectedProvider === 'nvidia' && (
+              <div className="mb-6">
+                <label className="block text-[10px] font-black uppercase tracking-[0.15em] text-zinc-400 dark:text-zinc-500 mb-2">
+                  Model Name
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={nvidiaModel}
+                    onChange={e => setNvidiaModel(e.target.value)}
+                    onFocus={() => setShowModelSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowModelSuggestions(false), 150)}
+                    placeholder="e.g. nvidia/nemotron-3-super-120b-a12b"
+                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 font-mono placeholder:text-zinc-300 dark:placeholder:text-zinc-600 placeholder:font-sans focus:outline-none focus:border-green-400 dark:focus:border-green-600 transition-colors"
+                  />
+                  {showModelSuggestions && (
+                    <div className="absolute z-10 w-full mt-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-lg overflow-hidden">
+                      {NVIDIA_MODEL_SUGGESTIONS.map(m => (
+                        <button
+                          key={m}
+                          onMouseDown={() => { setNvidiaModel(m); setShowModelSuggestions(false); }}
+                          className="w-full text-left px-4 py-2.5 text-[11px] font-mono text-zinc-700 dark:text-zinc-300 hover:bg-green-50 dark:hover:bg-green-950/30 hover:text-green-700 dark:hover:text-green-400 transition-colors border-b border-zinc-100 dark:border-zinc-700 last:border-0"
+                        >
+                          {m}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <p className="mt-1.5 text-[10px] text-zinc-400 dark:text-zinc-500">
+                  Browse all models at{' '}
+                  <a href="https://build.nvidia.com/explore/discover" target="_blank" rel="noopener" className="text-green-600 hover:underline">build.nvidia.com</a>
+                </p>
+              </div>
+            )}
 
             {/* Actions */}
             <div className="flex items-center justify-between">

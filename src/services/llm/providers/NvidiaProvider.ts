@@ -1,5 +1,6 @@
 import { LLMProvider, LLMMessage, LLMToolDefinition, LLMResponse, LLMToolCall } from '../types';
 
+// Routed through Vercel proxy to avoid CORS: /nvidia-api/v1 → https://integrate.api.nvidia.com/v1
 const NVIDIA_BASE_URL = '/nvidia-api/v1';
 
 export class NvidiaProvider implements LLMProvider {
@@ -15,7 +16,7 @@ export class NvidiaProvider implements LLMProvider {
     messages: LLMMessage[],
     tools?: LLMToolDefinition[],
     systemInstruction?: string,
-    modelName: string = 'minimaxai/minimax-m2.5',
+    modelName: string = 'nvidia/nemotron-3-super-120b-a12b',
     signal?: AbortSignal
   ): Promise<LLMResponse> {
     const openaiMessages: any[] = [];
@@ -47,14 +48,29 @@ export class NvidiaProvider implements LLMProvider {
       }
     }
 
+    // Detect thinking models (nemotron, deepseek-r1, etc.) that need reasoning budget
+    const isThinkingModel =
+      modelName.toLowerCase().includes('nemotron') ||
+      modelName.toLowerCase().includes('deepseek-r1') ||
+      modelName.toLowerCase().includes('qwq') ||
+      modelName.toLowerCase().includes('thinking');
+
     const body: any = {
       model: modelName,
       messages: openaiMessages,
       temperature: 1,
       top_p: 0.95,
-      max_tokens: 8192,
+      max_tokens: 16384,
       stream: true,
     };
+
+    // Enable thinking for reasoning models
+    if (isThinkingModel) {
+      body.extra_body = {
+        chat_template_kwargs: { enable_thinking: true },
+        reasoning_budget: 16384,
+      };
+    }
 
     if (tools && tools.length > 0) {
       body.tools = tools;
@@ -78,16 +94,17 @@ export class NvidiaProvider implements LLMProvider {
 
     if (!res.ok) {
       const errorBody = await res.text();
-      throw new Error(`API error ${res.status}: ${errorBody}`);
+      throw new Error(`NVIDIA API error ${res.status}: ${errorBody}`);
     }
 
-    // Read SSE stream and accumulate content + tool calls
     const reader = res.body?.getReader();
     if (!reader) return { content: null };
 
     const decoder = new TextDecoder();
     let content = '';
-    let toolCallsMap: Map<number, any> = new Map();
+    // reasoning_content is internal chain-of-thought — we collect but discard it
+    let _reasoning = '';
+    const toolCallsMap: Map<number, any> = new Map();
 
     while (true) {
       const { done, value } = await reader.read();
@@ -103,8 +120,14 @@ export class NvidiaProvider implements LLMProvider {
 
         try {
           const parsed = JSON.parse(data);
-          const delta = parsed.choices?.[0]?.delta;
+          if (!parsed.choices?.length) continue;
+          const delta = parsed.choices[0].delta;
           if (!delta) continue;
+
+          // reasoning_content = internal thinking, discard from final output
+          if (delta.reasoning_content) {
+            _reasoning += delta.reasoning_content;
+          }
 
           if (delta.content) {
             content += delta.content;
@@ -123,7 +146,7 @@ export class NvidiaProvider implements LLMProvider {
             }
           }
         } catch {
-          // skip malformed chunks
+          // skip malformed SSE chunks
         }
       }
     }
@@ -137,8 +160,7 @@ export class NvidiaProvider implements LLMProvider {
       }));
     }
 
-    // Strip <think>...</think> reasoning blocks — these are internal chain-of-thought
-    // and must never be shown to the user or stored in chat history.
+    // Strip any <think>...</think> blocks that appear inline in content
     const cleanContent = content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
 
     return { content: cleanContent || null, tool_calls: toolCalls };
