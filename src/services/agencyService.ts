@@ -1,5 +1,6 @@
 import { useAgencyStore } from '../store/agencyStore'
 import { useStore } from '../store/useStore'
+import { useAuthStore } from '../store/authStore'
 import {
   buildSystemPrompt,
   buildChatSystemPrompt,
@@ -178,8 +179,7 @@ export async function callAgent(params: {
   }
 
   // ── Platform proxy (Pro users without BYOK key) ──────────────
-  const { useAuthStore } = await import('../store/authStore').catch(() => ({ useAuthStore: null }))
-  const authState = useAuthStore?.getState?.()
+  const authState = useAuthStore.getState()
   const isPlatformMode = authState?.tier === 'pro' && !llmConfig.apiKey
 
   const MAX_RETRIES = 3;

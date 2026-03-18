@@ -68,10 +68,17 @@ const App: React.FC = () => {
     };
   }, [resize, stopResizing]);
 
-  // Only open BYOK modal if user has no API key AND is not Pro (platform keys)
+  // Open BYOK modal if no API key and not on Pro plan
+  // isAuthReady ensures we don't flash it before checking if user is Pro
   useEffect(() => {
-    if (isAuthReady && !isPro && !llmConfig.apiKey) {
-      setBYOKOpen(true);
+    if (!llmConfig.apiKey && !isPro) {
+      // Small delay so auth check completes first (avoids flash for Pro users)
+      const t = setTimeout(() => {
+        if (useAuthStore.getState().tier !== 'pro' && !useStore.getState().llmConfig.apiKey) {
+          setBYOKOpen(true)
+        }
+      }, 800)
+      return () => clearTimeout(t)
     }
   }, [isAuthReady]); // eslint-disable-line react-hooks/exhaustive-deps
 
