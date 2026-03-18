@@ -177,15 +177,58 @@ export async function callAgent(params: {
     );
   }
 
+  // ── Platform proxy (Pro users without BYOK key) ──────────────
+  const { useAuthStore } = await import('../store/authStore').catch(() => ({ useAuthStore: null }))
+  const authState = useAuthStore?.getState?.()
+  const isPlatformMode = authState?.tier === 'pro' && !llmConfig.apiKey
+
   const MAX_RETRIES = 3;
   let response;
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     throwIfAborted(signal);
     try {
-      response = await Promise.race([
-        provider.generateCompletion(messages, tools, systemInstruction, llmConfig.model, signal),
-        abortRace(signal),
-      ]);
+      if (isPlatformMode && authState?.session) {
+        // Route through server-side proxy — API key never leaves the server
+        const proxyRes = await Promise.race([
+          fetch('/api/llm/proxy', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${authState.session.access_token}`,
+            },
+            body: JSON.stringify({
+              provider: llmConfig.provider,
+              model: llmConfig.model,
+              messages,
+              tools,
+              systemInstruction,
+            }),
+            signal,
+          }),
+          abortRace(signal),
+        ]) as Response
+        if (!proxyRes.ok) {
+          const errText = await proxyRes.text()
+          throw new Error(`Proxy ${proxyRes.status}: ${errText.slice(0, 200)}`)
+        }
+        response = await proxyRes.json()
+      } else {
+        response = await Promise.race([
+          provider.generateCompletion(messages, tools, systemInstruction, llmConfig.model, signal),
+          abortRace(signal),
+        ])
+      }
+
+      // Guard: treat null/empty response as a retryable error
+      if (!response || (response.content === null && (!response.tool_calls || response.tool_calls.length === 0))) {
+        if (attempt < MAX_RETRIES - 1) {
+          useAgencyStore.getState().addLogEntry({ agentIndex, action: `empty response from LLM — retrying (attempt ${attempt + 2}/${MAX_RETRIES})` })
+          await new Promise(r => setTimeout(r, 2000 + attempt * 1000))
+          continue
+        }
+        throw new Error('LLM returned empty response after retries')
+      }
+
       break;
     } catch (e) {
       if ((e as DOMException)?.name === 'AbortError') throw e;

@@ -4,6 +4,7 @@
   "framework": "vite",
   "rewrites": [
     { "source": "/nvidia-api/:path*", "destination": "https://integrate.api.nvidia.com/:path*" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/api/:path*", "destination": "/api/:path*" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
