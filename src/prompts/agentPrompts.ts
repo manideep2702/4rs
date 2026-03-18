@@ -4,10 +4,14 @@ import type { Task } from '../store/agencyStore'
 // ─── Scope constraint (fixed for all agents) ──────────────────
 const SCOPE_CONSTRAINT = `
 SCOPE:
-Your job is to produce YOUR SPECIFIC MODULE or CONTENT PIECE — not a full application.
-You produce real code snippets, UI components, copy, logic, or structured content relevant to your role.
-The Orchestrator will assemble ALL team outputs into the final deliverable — do NOT wrap your output in a full HTML document.
-Output only what is in your area of expertise. Be thorough and complete within your module.
+Your output MUST be actual working code — HTML, CSS, or JavaScript relevant to your role.
+NEVER output JSON, design specs, bullet points, or documentation — only executable code.
+Your code will be combined with other agents' code by the Orchestrator into one complete web app.
+Examples of acceptable output:
+  - Designer: a <style> block with CSS rules, or an HTML component with inline styles
+  - Developer: a <script> block with JavaScript logic, or functional HTML with event handlers
+  - Copywriter: HTML markup containing the actual text content (headings, paragraphs, labels)
+Keep your code self-contained and focused on your area. Use comments to mark your section.
 `.trim()
 
 // ─── Workflow rules + response schema ─────────────────────────

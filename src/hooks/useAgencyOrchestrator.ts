@@ -160,8 +160,8 @@ export function useAgencyOrchestrator() {
         callAgent({
           agentIndex,
           userMessage: `You have been assigned task [${task.id}]: "${task.description}". ` +
-            `Execute the task now and call complete_task with your module output (your specific component or content — NOT a full HTML page). ` +
-            `The Orchestrator will combine all modules into the final deliverable. ` +
+            `Execute the task and call complete_task with WORKING CODE ONLY (HTML markup, CSS styles, or JavaScript — never JSON or design specs). ` +
+            `The Orchestrator assembles all code modules into the final web app. ` +
             `Only call request_client_approval if you genuinely cannot proceed without client input.`,
         }),
         timeout,
