@@ -328,26 +328,73 @@ export function useAgencyOrchestrator() {
             `Client responded to your approval request: "${text}". Incorporate their feedback. ` +
             `Call request_client_approval if you still need more input, otherwise proceed with your management tools (propose_task, update_client_brief, etc.).`
           )
+          if (response.functionCalls) {
+            for (const fn of response.functionCalls) {
+              processFunctionCall(fn, ORCHESTRATOR_INDEX)
+            }
+          }
         } else {
           // Build an enriched message that forces the model to act when requirements are present
           const workerAgents = getActiveAgentSet().agents.filter(a => !a.isPlayer && a.index !== ORCHESTRATOR_INDEX)
           const agentIds = workerAgents.map(a => `[ID:${a.index}] ${a.role}`).join(', ')
-          const enriched = store.phase === 'briefing' || store.clientBrief
+          const baseEnriched = store.phase === 'briefing' || store.clientBrief
             ? `Client message: "${text}"\n\nAvailable worker agents: ${agentIds}\n\n` +
               `MANDATORY (execute in this SINGLE response, no exceptions):\n` +
               `1. Call update_client_brief with the complete project requirements.\n` +
               `2. Call propose_task ONCE for EACH worker agent listed above.\n` +
               `Do NOT send only one tool call. Do NOT ask questions. Both steps are required now.`
             : text
-          response = await callAgent({ agentIndex: ORCHESTRATOR_INDEX, userMessage: enriched, chatMode: true })
-        }
 
-        if (response.functionCalls) {
-          for (const fn of response.functionCalls) {
-            processFunctionCall(fn, ORCHESTRATOR_INDEX)
+          // ── Watchdog: retry if orchestrator talks but never dispatches tasks ──
+          const MAX_DISPATCH_RETRIES = 2
+          let tasksDispatched = false
+
+          for (let attempt = 0; attempt <= MAX_DISPATCH_RETRIES && !tasksDispatched; attempt++) {
+            const messageToSend = attempt === 0
+              ? baseEnriched
+              : `WATCHDOG ALERT: You responded but called propose_task 0 times. This is not acceptable.\n\n` +
+                `Client request: "${text}"\n\nWorker agents waiting for tasks: ${agentIds}\n\n` +
+                `RIGHT NOW you MUST call propose_task for EVERY agent above. ` +
+                `Do not reply with text only. Tool calls are mandatory.`
+
+            response = await callAgent({ agentIndex: ORCHESTRATOR_INDEX, userMessage: messageToSend, chatMode: true })
+
+            if (response.functionCalls) {
+              for (const fn of response.functionCalls) {
+                processFunctionCall(fn, ORCHESTRATOR_INDEX)
+              }
+              tasksDispatched = response.functionCalls.some(fn => fn.name === 'propose_task')
+            }
+
+            if (!tasksDispatched && attempt < MAX_DISPATCH_RETRIES) {
+              store.addLogEntry({
+                agentIndex: ORCHESTRATOR_INDEX,
+                action: `watchdog: no tasks dispatched — auto-retrying (${attempt + 1}/${MAX_DISPATCH_RETRIES})…`,
+              })
+              await sleep(1500)
+            }
+          }
+
+          // Hard fallback: if orchestrator still hasn't dispatched, force-create tasks
+          if (!tasksDispatched && (store.phase === 'briefing' || store.clientBrief)) {
+            store.addLogEntry({
+              agentIndex: ORCHESTRATOR_INDEX,
+              action: `watchdog: orchestrator unresponsive — force-dispatching tasks to all workers`,
+            })
+            const brief = store.clientBrief || text
+            for (const agent of workerAgents) {
+              store.addTask({
+                title: agent.role,
+                description: `${agent.role} task for: ${brief}`,
+                assignedAgentIds: [agent.index],
+                status: 'scheduled',
+                requiresClientApproval: false,
+              })
+            }
           }
         }
-        return response.text || null
+
+        return response?.text || null
       } catch (err) {
         if ((err as DOMException)?.name !== 'AbortError') {
           console.error('[Orchestrator] Orchestrator message error:', err)
