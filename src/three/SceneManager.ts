@@ -501,8 +501,8 @@ export class SceneManager {
     const stateBuffer = this.controller.getAgentStateBuffer();
     if (!stateBuffer) return;
 
-    const MIN_DIST = 0.6; // Distance at which transparency starts
-    const TARGET_ALPHA = 0.4; // Alpha when fully overlapping
+    const MIN_DIST = 0.5; // Distance at which transparency starts
+    const TARGET_ALPHA = 0.82; // Alpha when fully overlapping — subtle, not ghostly
     const FADE_SPEED = 2.0;
 
     for (let i = 0; i < count; i++) {

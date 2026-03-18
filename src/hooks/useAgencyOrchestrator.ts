@@ -101,40 +101,77 @@ export function useAgencyOrchestrator() {
       let delivered = false
 
       for (let attempt = 0; attempt < MAX_DELIVERY_ATTEMPTS && !delivered; attempt++) {
-        const response = await callOrchestrator(
-          attempt === 0
-            ? prompt
-            : `${prompt}\n\nPrevious attempt failed to call notify_client_project_ready. You MUST call it now — this is the final instruction.`
-        )
-        if (response.functionCalls) {
-          for (const fn of response.functionCalls) {
-            processFunctionCall(fn, ORCHESTRATOR_INDEX)
+        try {
+          const response = await callOrchestrator(
+            attempt === 0
+              ? prompt
+              : `${prompt}\n\nPrevious attempt failed to call notify_client_project_ready. You MUST call it now — this is the final instruction.`
+          )
+          if (response.functionCalls) {
+            for (const fn of response.functionCalls) {
+              processFunctionCall(fn, ORCHESTRATOR_INDEX)
+            }
+            if (response.functionCalls.some(fn => fn.name === 'notify_client_project_ready')) {
+              delivered = true
+            }
           }
-          if (response.functionCalls.some(fn => fn.name === 'notify_client_project_ready')) {
-            delivered = true
-          }
+        } catch (attemptErr) {
+          if ((attemptErr as DOMException)?.name === 'AbortError') throw attemptErr
+          store.addLogEntry({
+            agentIndex: ORCHESTRATOR_INDEX,
+            action: `final assembly attempt ${attempt + 1} failed — ${(attemptErr as Error)?.message?.slice(0, 80) ?? 'error'}`,
+          })
+          // Continue to next attempt or fallback
         }
       }
 
-      // Fallback: if orchestrator never called notify_client_project_ready, assemble output manually
+      // Fallback: always runs — if orchestrator timed out or didn't call the tool, assemble directly
       if (!delivered && hasTasks) {
         const { finalOutput } = useAgencyStore.getState()
         if (!finalOutput) {
           store.addLogEntry({
             agentIndex: ORCHESTRATOR_INDEX,
-            action: `orchestrator did not deliver — using fallback assembly`,
+            action: `using fallback assembly — combining ${store.tasks.filter(t => t.output).length} task outputs directly`,
           })
-          const fallbackHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Project Output</title>` +
-            `<style>body{font-family:system-ui,sans-serif;max-width:900px;margin:2rem auto;padding:1rem;line-height:1.6}` +
-            `pre{background:#f5f5f5;padding:1rem;border-radius:6px;white-space:pre-wrap;word-break:break-word}</style></head>` +
-            `<body><h1>Project Deliverable</h1>${store.tasks.filter(t=>t.output).map(t =>
-              `<h2>${t.description}</h2><pre>${t.output?.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>`
-            ).join('')}</body></html>`
+          // Build a proper merged HTML: extract body content from each task output
+          const mergedSections = store.tasks.filter(t => t.output).map(t => {
+            const out = t.output!
+            // If it's a full HTML doc, extract the body content
+            const bodyMatch = out.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
+            return bodyMatch ? bodyMatch[1].trim() : out
+          }).join('\n\n')
+
+          const fallbackHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Deliverable</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f9fafb; color: #111827; line-height: 1.6; }
+  </style>
+</head>
+<body>
+${mergedSections}
+</body>
+</html>`
           processFunctionCall({ name: 'notify_client_project_ready', args: { finalWebApp: fallbackHtml } }, ORCHESTRATOR_INDEX)
         }
       }
     } catch (err) {
       if ((err as DOMException)?.name !== 'AbortError') console.error('[Orchestrator] final delivery error:', err)
+      // Last-resort fallback — even if something completely unexpected threw
+      const storeNow = useAgencyStore.getState()
+      if (!storeNow.finalOutput && storeNow.tasks.some(t => t.output)) {
+        const mergedSections = storeNow.tasks.filter(t => t.output).map(t => {
+          const out = t.output!
+          const bodyMatch = out.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
+          return bodyMatch ? bodyMatch[1].trim() : out
+        }).join('\n\n')
+        const emergencyHtml = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Project Output</title><style>body{font-family:system-ui,sans-serif;background:#f9fafb;padding:2rem}</style></head><body>${mergedSections}</body></html>`
+        processFunctionCall({ name: 'notify_client_project_ready', args: { finalWebApp: emergencyHtml } }, ORCHESTRATOR_INDEX)
+      }
     } finally {
       runningAgents.current.delete(ORCHESTRATOR_INDEX)
     }
