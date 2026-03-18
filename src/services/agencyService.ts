@@ -44,6 +44,14 @@ function abortRace(signal: AbortSignal): Promise<never> {
   });
 }
 
+/** Per-call timeout — rejects if a single LLM API call takes longer than this. */
+const CALL_TIMEOUT_MS = 45_000; // 45 seconds per individual call
+function callTimeout(ms: number): Promise<never> {
+  return new Promise((_, reject) =>
+    setTimeout(() => reject(new DOMException('LLM call timed out', 'TimeoutError')), ms)
+  );
+}
+
 const waitForResume = (signal: AbortSignal) => {
     return new Promise<void>((resolve, reject) => {
       if (signal.aborted) { reject(new DOMException('LLM call aborted by reset', 'AbortError')); return; }
@@ -206,6 +214,7 @@ export async function callAgent(params: {
             signal,
           }),
           abortRace(signal),
+          callTimeout(CALL_TIMEOUT_MS),
         ]) as Response
         if (!proxyRes.ok) {
           const errText = await proxyRes.text()
@@ -216,6 +225,7 @@ export async function callAgent(params: {
         response = await Promise.race([
           provider.generateCompletion(messages, tools, systemInstruction, llmConfig.model, signal),
           abortRace(signal),
+          callTimeout(CALL_TIMEOUT_MS),
         ])
       }
 
@@ -240,10 +250,10 @@ export async function callAgent(params: {
         (e as Error)?.message?.toLowerCase()?.includes('timeout');
 
       if (attempt < MAX_RETRIES - 1 && (isRateLimit || isTimeout)) {
-        const backoff = (attempt + 1) * 3000 + Math.random() * 2000;
+        const backoff = isTimeout ? 2000 : (attempt + 1) * 3000 + Math.random() * 2000;
         useAgencyStore.getState().addLogEntry({
           agentIndex,
-          action: `API ${isTimeout ? 'timed out' : 'rate limited'} — retrying in ${Math.round(backoff / 1000)}s (attempt ${attempt + 2}/${MAX_RETRIES})`,
+          action: `⟳ watchdog: ${isTimeout ? `no response in ${CALL_TIMEOUT_MS / 1000}s` : 'rate limited'} — retrying immediately (attempt ${attempt + 2}/${MAX_RETRIES})`,
         });
         await new Promise((r) => setTimeout(r, backoff));
         continue;
