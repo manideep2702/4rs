@@ -172,19 +172,23 @@ export function useAgencyOrchestrator() {
         action: `assembling final deliverable from ${store.tasks.filter(t => t.output).length} task outputs…`,
       })
 
+      const brief = store.clientBrief || 'the requested project'
       const prompt = hasTasks
-        ? `All tasks are completed. Team outputs:\n\n${outputs}\n\n` +
-          `MANDATORY: Call notify_client_project_ready RIGHT NOW with a COMPLETE, PROFESSIONAL, FULLY FUNCTIONAL web application as a single self-contained HTML file.\n\n` +
-          `CRITICAL REQUIREMENTS — this must be a REAL SOFTWARE PRODUCT, not a presentation:\n` +
-          `- Navigation bar with working links/tabs\n` +
-          `- Fully interactive JavaScript (working buttons, forms, game logic, state management)\n` +
-          `- Modern CSS: gradients, shadows, hover effects, animations, responsive design\n` +
-          `- Professional color palette and typography — looks like a real deployed product\n` +
-          `- All features from the brief must WORK (e.g. a game must be playable, a booking form must validate input)\n` +
-          `- NO slide-style sections, NO bullet lists of specs, NO "coming soon" placeholders\n` +
-          `- Think Spotify, Airbnb, Linear — a polished product UI, not a Word document\n\n` +
-          `Integrate all team outputs into one cohesive app. Do not explain — just call the tool with the complete HTML now.`
-        : `All tasks have been removed. Call notify_client_project_ready with a brief summary HTML page explaining the project was reset.`
+        ? `Team outputs for reference:\n\n${outputs}\n\n` +
+          `Client brief: "${brief}"\n\n` +
+          `MANDATORY: Call notify_client_project_ready RIGHT NOW.\n\n` +
+          `Write a BRAND NEW, COMPLETE single-file HTML web app from scratch that fulfills the client brief.\n` +
+          `DO NOT copy-paste agent outputs — use them only as design reference.\n` +
+          `Instead, write ONE unified <!DOCTYPE html> document where ALL CSS is in one <style> block in <head>, ALL JavaScript is in one <script> block before </body>, and ALL HTML content is in <body>.\n\n` +
+          `MANDATORY FEATURES:\n` +
+          `• Fully working interactive UI (the app must function — games playable, forms submittable, tabs switchable)\n` +
+          `• Beautiful modern design: CSS variables, gradients, box-shadows, smooth transitions, hover effects\n` +
+          `• Responsive layout that works on all screen sizes\n` +
+          `• Professional typography and color palette\n` +
+          `• All HTML classes/IDs must match the CSS selectors and JavaScript querySelector calls\n\n` +
+          `DO NOT produce: slide decks, bullet-list documents, "coming soon" placeholders, or unstyled pages.\n` +
+          `Call notify_client_project_ready now with the complete HTML. No explanations.`
+        : `All tasks removed. Call notify_client_project_ready with a simple HTML page saying the project was reset.`
 
       const MAX_DELIVERY_ATTEMPTS = 2
       let delivered = false
@@ -198,6 +202,19 @@ export function useAgencyOrchestrator() {
           )
           if (response.functionCalls) {
             for (const fn of response.functionCalls) {
+              // Validate HTML quality before accepting: must have a <style> block with actual CSS
+              if (fn.name === 'notify_client_project_ready') {
+                const html = (fn.args as { finalWebApp?: string }).finalWebApp || ''
+                const hasStyle = /<style[^>]*>[^<]{50,}<\/style>/i.test(html)
+                if (!hasStyle && hasTasks) {
+                  // LLM produced HTML without CSS — override with smart fallback assembly
+                  store.addLogEntry({
+                    agentIndex: ORCHESTRATOR_INDEX,
+                    action: `assembly had no CSS — switching to smart fallback assembler`,
+                  })
+                  fn.args = { finalWebApp: assembleTaskOutputs(store.tasks) }
+                }
+              }
               processFunctionCall(fn, ORCHESTRATOR_INDEX)
             }
             if (response.functionCalls.some(fn => fn.name === 'notify_client_project_ready')) {
