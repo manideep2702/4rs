@@ -84,14 +84,52 @@ export function useAgencyOrchestrator() {
         .map((t) => `[${t.description}]\n${t.output}`)
         .join('\n\n---\n\n')
 
-      const prompt = hasTasks
-        ? `All tasks are completed. Team outputs:\n\n${outputs}\n\nNow assemble the final prompt for the client and call notify_client_project_ready.`
-        : `All tasks have been removed. The project is effectively empty but needs to be closed. Summarize the situation and call notify_client_project_ready.`
+      store.addLogEntry({
+        agentIndex: ORCHESTRATOR_INDEX,
+        action: `assembling final deliverable from ${store.tasks.filter(t => t.output).length} task outputs…`,
+      })
 
-      const response = await callOrchestrator(prompt)
-      if (response.functionCalls) {
-        for (const fn of response.functionCalls) {
-          processFunctionCall(fn, ORCHESTRATOR_INDEX)
+      const prompt = hasTasks
+        ? `All tasks are completed. Team outputs:\n\n${outputs}\n\n` +
+          `MANDATORY: You MUST call notify_client_project_ready RIGHT NOW with a complete, self-contained HTML document (<!DOCTYPE html>...) ` +
+          `that combines ALL the above outputs into one working interactive web app. ` +
+          `Do not explain, do not ask questions — just call the tool with the full HTML.`
+        : `All tasks have been removed. Call notify_client_project_ready with a brief summary HTML page explaining the project was reset.`
+
+      const MAX_DELIVERY_ATTEMPTS = 2
+      let delivered = false
+
+      for (let attempt = 0; attempt < MAX_DELIVERY_ATTEMPTS && !delivered; attempt++) {
+        const response = await callOrchestrator(
+          attempt === 0
+            ? prompt
+            : `${prompt}\n\nPrevious attempt failed to call notify_client_project_ready. You MUST call it now — this is the final instruction.`
+        )
+        if (response.functionCalls) {
+          for (const fn of response.functionCalls) {
+            processFunctionCall(fn, ORCHESTRATOR_INDEX)
+          }
+          if (response.functionCalls.some(fn => fn.name === 'notify_client_project_ready')) {
+            delivered = true
+          }
+        }
+      }
+
+      // Fallback: if orchestrator never called notify_client_project_ready, assemble output manually
+      if (!delivered && hasTasks) {
+        const { finalOutput } = useAgencyStore.getState()
+        if (!finalOutput) {
+          store.addLogEntry({
+            agentIndex: ORCHESTRATOR_INDEX,
+            action: `orchestrator did not deliver — using fallback assembly`,
+          })
+          const fallbackHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Project Output</title>` +
+            `<style>body{font-family:system-ui,sans-serif;max-width:900px;margin:2rem auto;padding:1rem;line-height:1.6}` +
+            `pre{background:#f5f5f5;padding:1rem;border-radius:6px;white-space:pre-wrap;word-break:break-word}</style></head>` +
+            `<body><h1>Project Deliverable</h1>${store.tasks.filter(t=>t.output).map(t =>
+              `<h2>${t.description}</h2><pre>${t.output?.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>`
+            ).join('')}</body></html>`
+          processFunctionCall({ name: 'notify_client_project_ready', args: { finalWebApp: fallbackHtml } }, ORCHESTRATOR_INDEX)
         }
       }
     } catch (err) {
@@ -122,8 +160,8 @@ export function useAgencyOrchestrator() {
         callAgent({
           agentIndex,
           userMessage: `You have been assigned task [${task.id}]: "${task.description}". ` +
-            `First, analyze the task and call request_client_approval to discuss your plan with the client. ` +
-            `If the client approves, call complete_task with your final output.`,
+            `Execute the task now and call complete_task with your full output. ` +
+            `Only call request_client_approval if you genuinely cannot proceed without client input — avoid blocking if possible.`,
         }),
         timeout,
       ])
@@ -277,7 +315,11 @@ export function useAgencyOrchestrator() {
           const workerAgents = getActiveAgentSet().agents.filter(a => !a.isPlayer && a.index !== ORCHESTRATOR_INDEX)
           const agentIds = workerAgents.map(a => `[ID:${a.index}] ${a.role}`).join(', ')
           const enriched = store.phase === 'briefing' || store.clientBrief
-            ? `Client message: "${text}"\n\nAvailable worker agents for propose_task: ${agentIds}\n\nIf this message contains ANY project requirements, immediately call update_client_brief then propose_task for each worker agent listed above. Do not ask another question.`
+            ? `Client message: "${text}"\n\nAvailable worker agents: ${agentIds}\n\n` +
+              `MANDATORY (execute in this SINGLE response, no exceptions):\n` +
+              `1. Call update_client_brief with the complete project requirements.\n` +
+              `2. Call propose_task ONCE for EACH worker agent listed above.\n` +
+              `Do NOT send only one tool call. Do NOT ask questions. Both steps are required now.`
             : text
           response = await callAgent({ agentIndex: ORCHESTRATOR_INDEX, userMessage: enriched, chatMode: true })
         }

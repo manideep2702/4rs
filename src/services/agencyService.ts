@@ -285,17 +285,22 @@ export async function callAgent(params: {
   }
 
   // Special case: if there's a propose_task tool call, show a feedback message in the chat
-  const proposeCall = response.tool_calls?.find(tc => tc.function.name === 'propose_task');
-  if (proposeCall && !assistantContent) {
+  const proposeCalls = response.tool_calls?.filter(tc => tc.function.name === 'propose_task') ?? [];
+  if (proposeCalls.length > 0 && !assistantContent) {
     try {
-      const args = JSON.parse(proposeCall.function.arguments);
-      assistantContent = `Understood. I'm scheduling the following task: "${args.title}". `;
-      if (args.requiresApproval) {
-        assistantContent += "I'll ask for your confirmation before the team starts working on it.";
-      }
+      const titles = proposeCalls.map(tc => JSON.parse(tc.function.arguments).title).filter(Boolean)
+      assistantContent = titles.length > 1
+        ? `On it. I'm dispatching ${titles.length} tasks to the team: ${titles.map(t => `"${t}"`).join(', ')}.`
+        : `On it. I'm scheduling "${titles[0] || 'the task'}" for the team.`
     } catch (e) {
-      assistantContent = "Understood. I'm scheduling a task for the team.";
+      assistantContent = "On it. I'm dispatching tasks to the team."
     }
+  }
+
+  // Special case: update_client_brief with no text — generate a brief acknowledgment
+  const briefCall = response.tool_calls?.find(tc => tc.function.name === 'update_client_brief');
+  if (briefCall && !assistantContent && proposeCalls.length === 0) {
+    assistantContent = "Got it — I've noted the brief and will assign the team shortly."
   }
 
   // REFINEMENT: If we are in CHAT MODE, and the assistant generated content that looks like
